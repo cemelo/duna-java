@@ -1,0 +1,3 @@
+rootProject.name = 'duna-java'
+include 'duna-core'
+
