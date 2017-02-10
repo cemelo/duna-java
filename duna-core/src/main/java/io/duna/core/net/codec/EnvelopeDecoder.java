@@ -1,16 +1,13 @@
 package io.duna.core.net.codec;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.duna.core.net.Envelope;
 import io.duna.core.net.impl.EnvelopeImpl;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-
-import java.io.DataInput;
-import java.nio.charset.Charset;
 
 public class EnvelopeDecoder extends LengthFieldBasedFrameDecoder {
 
@@ -35,10 +32,7 @@ public class EnvelopeDecoder extends LengthFieldBasedFrameDecoder {
         ByteBuf frame = (ByteBuf) super.decode(ctx, in);
         if (frame == null) return null;
 
-        CharSequence source = frame.readCharSequence(128, Charset.forName("UTF-8"));
-        CharSequence target = frame.readCharSequence(128, Charset.forName("UTF-8"));
-
-
+        int headerSize = frame.readInt();
 
         Envelope<ByteBuf> envelope = new EnvelopeImpl<>();
 

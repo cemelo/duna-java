@@ -7,35 +7,28 @@ import java.util.Map;
 
 public class EnvelopeImpl<T> implements Envelope<T> {
 
-    private final String source;
-    private final String target;
-    private final Map<String, String> headers;
-    private final T body;
-
-    public EnvelopeImpl(String source, String target, Map<String, String> headers, T body) {
-        this.source = source;
-        this.target = target;
-        this.headers = Collections.unmodifiableMap(headers);
-        this.body = body;
-    }
+    private String source;
+    private String target;
+    private Map<String, String> headers;
+    private T body;
 
     @Override
     public String source() {
-        return null;
+        return source;
     }
 
     @Override
     public String target() {
-        return null;
+        return target;
     }
 
     @Override
     public Map<String, String> headers() {
-        return null;
+        return headers;
     }
 
     @Override
     public T body() {
-        return null;
+        return body;
     }
 }
