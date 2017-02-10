@@ -137,6 +137,8 @@ GitHub.sublime-settings
 .gradle
 /build/
 
+**/build
+
 # Ignore Gradle GUI config
 gradle-app.setting
 

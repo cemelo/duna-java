@@ -1,10 +1,25 @@
-apply plugin: 'java'
+buildscript {
+  repositories {
+    jcenter()
+    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap-1.1' }
+  }
+}
+
+plugins {
+  id 'java'
+  id 'nebula.kotlin' version '1.1.0-beta-38'
+}
 
 repositories {
   jcenter()
+  maven { url 'https://dl.bintray.com/kotlin/kotlin-eap-1.1' }
 }
 
 dependencies {
+  compile group: 'org.jetbrains.kotlinx',
+    name: 'kotlinx-coroutines-core',
+    version: '0.8-beta'
+
   compile group: 'io.netty',
     name: 'netty-transport',
     version: '4.1.8.Final'
@@ -13,9 +28,17 @@ dependencies {
     name: 'netty-handler',
     version: '4.1.8.Final'
 
-  compile group: 'co.paralleluniverse',
-    name: 'quasar-core',
-    version: '0.7.7'
+  compile group: 'com.fasterxml.jackson.core',
+    name: 'jackson-core',
+    version: '2.8.6'
+
+  compile group: 'com.fasterxml.jackson.core',
+    name: 'jackson-databind',
+    version: '2.8.6'
+
+  compile group: 'org.msgpack',
+    name: 'jackson-dataformat-msgpack',
+    version: '0.8.11'
 
   compile group: 'io.reactivex.rxjava2',
     name: 'rxjava',
@@ -34,3 +57,5 @@ compileJava {
   options.incremental = true
   options.fork = true
 }
+
+
