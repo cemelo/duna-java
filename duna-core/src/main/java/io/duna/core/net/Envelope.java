@@ -1,6 +1,6 @@
 package io.duna.core.net;
 
-import java.util.Map;
+import org.eclipse.collections.api.map.ImmutableMap;
 
 public interface Envelope<T> {
 
@@ -8,7 +8,7 @@ public interface Envelope<T> {
 
     String target();
 
-    Map<String, String> headers();
+    ImmutableMap<String, String> headers();
 
     T body();
 }

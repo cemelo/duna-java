@@ -1,42 +1,48 @@
 package io.duna.core.net.codec;
 
-import io.duna.core.net.Envelope;
-import io.duna.core.net.impl.EnvelopeImpl;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.duna.core.net.impl.envelope.RawEnvelope;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.factory.Maps;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
-public class EnvelopeDecoder extends LengthFieldBasedFrameDecoder {
+import java.util.List;
 
-    private final ObjectMapper objectMapper;
-
-    public EnvelopeDecoder(ObjectMapper objectMapper) {
-        super(Integer.MAX_VALUE,
-            1,
-            4,
-            0,
-            5);
-
-        this.objectMapper = objectMapper;
-    }
+public class EnvelopeDecoder extends ByteToMessageDecoder {
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        short magic = in.getShort(0);
-        if (magic != 0xDF)
-            throw new IllegalStateException("Invalid message.");
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        in.markReaderIndex();
 
-        ByteBuf frame = (ByteBuf) super.decode(ctx, in);
-        if (frame == null) return null;
+        int headerLength = in.readInt();
 
-        int headerSize = frame.readInt();
+        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new ByteBufInputStream(in));
 
-        Envelope<ByteBuf> envelope = new EnvelopeImpl<>();
+        String source = unpacker.unpackString();
+        String target = unpacker.unpackString();
 
+        int headerSize = unpacker.unpackMapHeader();
+        MutableMap<String, String> headers = Maps.mutable.ofInitialCapacity(headerSize);
+        for (int i = 0; i < headerSize; i++) {
+            headers.put(unpacker.unpackString(), unpacker.unpackString());
+        }
 
-        return super.decode(ctx, in);
+        in.resetReaderIndex()
+            .readerIndex(in.readerIndex() + headerLength);
+
+        ByteBuf body = null;
+        if (in.readableBytes() > 0) {
+            body = Unpooled.directBuffer(in.readableBytes());
+            in.getBytes(in.readerIndex(), body);
+        }
+
+        in.readerIndex(in.writerIndex());
+
+        out.add(new RawEnvelope(source, target, headers.toImmutable(), body));
     }
 }
