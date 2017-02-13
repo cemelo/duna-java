@@ -1,14 +1,12 @@
 package io.duna.core.net.codec;
 
-import io.duna.core.net.impl.envelope.BufferEnvelope;
+import io.duna.core.net.impl.EnvelopeImpl;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.multimap.MutableMultimap;
-import org.eclipse.collections.impl.factory.Maps;
 import org.eclipse.collections.impl.factory.Multimaps;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -49,6 +47,6 @@ public class EnvelopeDecoder extends ByteToMessageDecoder {
 
         in.readerIndex(in.writerIndex());
 
-        out.add(new BufferEnvelope(source, target, headers.toImmutable(), body.nioBuffer()));
+        out.add(new EnvelopeImpl(source, target, headers.toImmutable(), body.nioBuffer()));
     }
 }

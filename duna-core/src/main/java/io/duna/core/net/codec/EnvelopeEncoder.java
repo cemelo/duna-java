@@ -1,7 +1,6 @@
 package io.duna.core.net.codec;
 
-import io.duna.core.net.impl.envelope.BufferEnvelope;
-
+import io.duna.core.net.impl.EnvelopeImpl;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,10 +9,10 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
 
-public class EnvelopeEncoder extends MessageToByteEncoder<BufferEnvelope> {
+public class EnvelopeEncoder extends MessageToByteEncoder<EnvelopeImpl<ByteBuf>> {
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, BufferEnvelope msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, EnvelopeImpl<ByteBuf> msg, ByteBuf out) throws Exception {
         ByteBufOutputStream outputStream = new ByteBufOutputStream(ctx.alloc()
             .directBuffer(50));
 
@@ -33,9 +32,9 @@ public class EnvelopeEncoder extends MessageToByteEncoder<BufferEnvelope> {
         out.writeBytes(outputStream.buffer());
 
         if (msg.body() != null) {
-            msg.body().mark();
+            msg.body().markReaderIndex();
             out.writeBytes(msg.body());
-            msg.body().reset();
+            msg.body().resetReaderIndex();
         }
     }
 }

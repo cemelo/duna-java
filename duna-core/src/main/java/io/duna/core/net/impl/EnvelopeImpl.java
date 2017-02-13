@@ -1,23 +1,21 @@
-package io.duna.core.net.impl.envelope;
+package io.duna.core.net.impl;
 
 import io.duna.core.net.Envelope;
-
 import org.eclipse.collections.api.multimap.ImmutableMultimap;
 
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public class BufferEnvelope implements Envelope<ByteBuffer> {
+public class EnvelopeImpl<T> implements Envelope<T> {
 
     private String source;
     private String target;
     private ImmutableMultimap<String, String> headers;
-    private ByteBuffer body;
+    private T body;
 
-    public BufferEnvelope(String source,
-                          String target,
-                          ImmutableMultimap<String, String> headers,
-                          ByteBuffer body) {
+    public EnvelopeImpl(String source,
+                        String target,
+                        ImmutableMultimap<String, String> headers,
+                        T body) {
         this.source = source;
         this.target = target;
         this.headers = headers;
@@ -40,7 +38,7 @@ public class BufferEnvelope implements Envelope<ByteBuffer> {
     }
 
     @Override
-    public ByteBuffer body() {
+    public T body() {
         return body;
     }
 
@@ -48,7 +46,7 @@ public class BufferEnvelope implements Envelope<ByteBuffer> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BufferEnvelope envelope = (BufferEnvelope) o;
+        EnvelopeImpl envelope = (EnvelopeImpl) o;
         return Objects.equals(source, envelope.source) &&
             Objects.equals(target, envelope.target) &&
             Objects.equals(headers, envelope.headers) &&
@@ -62,7 +60,7 @@ public class BufferEnvelope implements Envelope<ByteBuffer> {
 
     @Override
     public String toString() {
-        return "BufferEnvelope{" +
+        return "EnvelopeImpl{" +
             "source='" + source + '\'' +
             ", target='" + target + '\'' +
             ", headers=" + headers +
