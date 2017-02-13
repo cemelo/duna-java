@@ -13,13 +13,10 @@ public class DunaPrefixCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        msg.retain();
-        ByteBuf result = Unpooled
-            .compositeBuffer()
-            .addComponents(Unpooled.buffer(1).writeByte(PREFIX), msg)
-            .writerIndex(msg.writerIndex() + 1);
-
-        out.add(result);
+        out.add(ctx.alloc()
+            .buffer(1)
+            .writeByte(0xDF));
+        out.add(msg.retain());
     }
 
     @Override
@@ -27,7 +24,6 @@ public class DunaPrefixCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
         if (msg.readUnsignedByte() != PREFIX)
             throw new IllegalStateException("Invalid message.");
 
-        msg.retain();
-        out.add(msg);
+        out.add(msg.retainedSlice(msg.readerIndex(), msg.readableBytes()));
     }
 }

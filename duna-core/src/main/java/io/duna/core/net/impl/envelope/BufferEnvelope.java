@@ -1,19 +1,23 @@
 package io.duna.core.net.impl.envelope;
 
 import io.duna.core.net.Envelope;
-import io.netty.buffer.ByteBuf;
-import org.eclipse.collections.api.map.ImmutableMap;
 
+import org.eclipse.collections.api.multimap.ImmutableMultimap;
+
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public class RawEnvelope implements Envelope<ByteBuf> {
+public class BufferEnvelope implements Envelope<ByteBuffer> {
 
     private String source;
     private String target;
-    private ImmutableMap<String, String> headers;
-    private ByteBuf body;
+    private ImmutableMultimap<String, String> headers;
+    private ByteBuffer body;
 
-    public RawEnvelope(String source, String target, ImmutableMap<String, String> headers, ByteBuf body) {
+    public BufferEnvelope(String source,
+                          String target,
+                          ImmutableMultimap<String, String> headers,
+                          ByteBuffer body) {
         this.source = source;
         this.target = target;
         this.headers = headers;
@@ -31,12 +35,12 @@ public class RawEnvelope implements Envelope<ByteBuf> {
     }
 
     @Override
-    public ImmutableMap<String, String> headers() {
+    public ImmutableMultimap<String, String> headers() {
         return headers;
     }
 
     @Override
-    public ByteBuf body() {
+    public ByteBuffer body() {
         return body;
     }
 
@@ -44,7 +48,7 @@ public class RawEnvelope implements Envelope<ByteBuf> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RawEnvelope envelope = (RawEnvelope) o;
+        BufferEnvelope envelope = (BufferEnvelope) o;
         return Objects.equals(source, envelope.source) &&
             Objects.equals(target, envelope.target) &&
             Objects.equals(headers, envelope.headers) &&
@@ -58,7 +62,7 @@ public class RawEnvelope implements Envelope<ByteBuf> {
 
     @Override
     public String toString() {
-        return "RawEnvelope{" +
+        return "BufferEnvelope{" +
             "source='" + source + '\'' +
             ", target='" + target + '\'' +
             ", headers=" + headers +
