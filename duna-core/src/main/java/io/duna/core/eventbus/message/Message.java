@@ -1,9 +1,7 @@
 package io.duna.core.eventbus.message;
 
-import io.duna.core.eventbus.Context;
-import io.duna.core.eventbus.event.Event;
-
-import java.util.Set;
+import io.duna.core.eventbus.Event;
+import org.eclipse.collections.api.multimap.Multimap;
 
 public interface Message<T> {
 
@@ -11,13 +9,17 @@ public interface Message<T> {
 
     String target();
 
-    Context headers();
+    String returnAddress();
 
-    Set<T> attachments();
+    Multimap<String, String> headers();
 
-    <V> Event<V> reply();
+    T body();
+
+    String cause();
+
+    boolean succeeded();
 
     boolean failed();
 
-    String cause();
+    <V> Event<V> reply();
 }

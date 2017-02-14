@@ -1,13 +1,10 @@
-package io.duna.core.eventbus.event;
+package io.duna.core.eventbus;
 
+import io.duna.core.concurrent.Future;
 import io.duna.core.eventbus.message.Message;
 import io.duna.core.function.Handler;
-
 import io.reactivex.Observable;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public interface Event<T> {
@@ -18,7 +15,15 @@ public interface Event<T> {
 
     Event<T> filter(Predicate<? super T> predicate);
 
-    <V> CompletableFuture<Message<V>> send(T message);
+    Event<T> deadLetterHandler(Handler<T> handler);
+
+    String getName();
+
+    Future<Void> purge();
+
+    Future<Void> purge(Handler<?> handler);
+
+    <V> Future<Message<V>> send(T message);
 
     Future<Void> publish(T message);
 
@@ -26,7 +31,11 @@ public interface Event<T> {
 
     void consume(Handler<Message<T>> consumer);
 
-    void probe(Handler<Message<T>> consumer, TimeUnit interval);
+    default void dequeue(Handler<Message<T>> handler) {
+        dequeue(handler, 0);
+    }
+
+    void dequeue(Handler<Message<T>> consumer, long interval);
 
     Observable<T> observe();
 }
