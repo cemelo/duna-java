@@ -1,6 +1,6 @@
 package io.duna.core.concurrent;
 
-import io.duna.core.Handler;
+import io.duna.core.function.Handler;
 
 import io.netty.channel.EventLoop;
 

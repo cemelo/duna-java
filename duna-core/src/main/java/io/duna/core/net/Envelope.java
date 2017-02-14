@@ -11,5 +11,4 @@ public interface Envelope<T> {
     ImmutableMultimap<String, String> headers();
 
     T body();
-
 }

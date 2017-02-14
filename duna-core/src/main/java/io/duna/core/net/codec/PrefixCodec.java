@@ -7,7 +7,7 @@ import io.netty.handler.codec.MessageToMessageCodec;
 
 import java.util.List;
 
-public class DunaPrefixCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
+public class PrefixCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     private static final short PREFIX = 0xDF;
 

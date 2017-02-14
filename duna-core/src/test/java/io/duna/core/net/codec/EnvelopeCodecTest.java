@@ -1,24 +1,27 @@
 package io.duna.core.net.codec;
 
 import io.duna.core.net.impl.EnvelopeImpl;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.eclipse.collections.impl.factory.Multimaps;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class EnvelopeCodecsTest {
+public class EnvelopeCodecTest {
 
     private static final byte[] message = new byte[]{
-        (byte) 0, 0, 0, 0x0A,     // Size
         (byte) 0xA1, 0x73,        // Source
         (byte) 0xA1, 0x74,        // Target
         (byte) 0x81,              // Header map size
         (byte) 0xA1, 0x68,        // Map key
         (byte) 0xA2, 0x68, 0x76,  // Map value
+        (byte) 0xC0,
         (byte) 0x62,              // Body
     };
 
@@ -28,7 +31,7 @@ public class EnvelopeCodecsTest {
 
     @Test
     public void testEncodingValidMessage() throws Exception {
-        EmbeddedChannel channel = new EmbeddedChannel(new EnvelopeEncoder());
+        EmbeddedChannel channel = new EmbeddedChannel(new EnvelopeCodec());
         channel.writeOutbound(envelope);
 
         ByteBuf buffer = channel.readOutbound();
@@ -41,11 +44,15 @@ public class EnvelopeCodecsTest {
 
     @Test
     public void testDecodingValidMessage() throws Exception {
-        EmbeddedChannel channel = new EmbeddedChannel(new EnvelopeDecoder());
+        EmbeddedChannel channel = new EmbeddedChannel(new EnvelopeCodec());
         channel.writeInbound(Unpooled.wrappedBuffer(message));
 
         EnvelopeImpl<ByteBuf> received = channel.readInbound();
 
-        assertEquals(envelope, received);
+        assertEquals(envelope.source(), received.source());
+        assertEquals(envelope.target(), received.target());
+        assertEquals(envelope.headers(), received.headers());
+        assertEquals(envelope.body().toString(Charset.defaultCharset()),
+            received.body().toString(Charset.defaultCharset()));
     }
 }
