@@ -1,4 +1,4 @@
-package io.duna.core.concurrent;
+package io.duna.core.concurrent.future;
 
 import java.util.List;
 

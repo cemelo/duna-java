@@ -1,4 +1,4 @@
-package io.duna.core.concurrent;
+package io.duna.core.concurrent.future;
 
 import io.duna.core.function.Handler;
 
@@ -8,19 +8,19 @@ public interface Future<T> {
 
     boolean failed();
 
+    boolean cancelled();
+
     Future<T> onComplete(Handler<T> handler);
 
-    Future<T> onError(Handler<? extends Throwable> errorHandler);
+    <V extends Throwable> Future<T> onError(Handler<V> errorHandler);
 
     Future<T> onCancel(Handler<Void> cancellationHandler);
-
-    T get();
 
     void cancel();
 
     void complete(T result);
 
-    void fail(Throwable error);
+    <V extends Throwable> void fail(V error);
 
     <V> CompositeFuture andThen(Handler<V> handler);
 }

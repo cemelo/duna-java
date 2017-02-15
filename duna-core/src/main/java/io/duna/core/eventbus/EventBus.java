@@ -1,15 +1,15 @@
 package io.duna.core.eventbus;
 
+import io.duna.core.concurrent.future.Future;
 import io.duna.core.function.Handler;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 public interface EventBus {
 
     <T> Event<T> event(String name);
 
-    CompletableFuture<EventBus> purgeAll();
+    Future<EventBus> purgeAll();
 
-    CompletableFuture<EventBus> purgeAll(Handler<Set<?>> handler);
+    Future<EventBus> purgeAll(Handler<Set<?>> handler);
 }

@@ -1,6 +1,6 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.concurrent.Future;
+import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.message.Message;
 import io.duna.core.function.Handler;
 import io.reactivex.Observable;

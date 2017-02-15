@@ -1,8 +1,8 @@
-package io.duna.core.eventbus.impl;
+package io.duna.core.eventbus.event;
 
-import io.duna.core.concurrent.Future;
+import io.duna.core.concurrent.future.Future;
+import io.duna.core.eventbus.DefaultEventBus;
 import io.duna.core.eventbus.Event;
-import io.duna.core.eventbus.exception.EventResponseException;
 import io.duna.core.eventbus.message.Message;
 import io.duna.core.function.Handler;
 import io.reactivex.Observable;
@@ -10,20 +10,16 @@ import org.eclipse.collections.api.multimap.MutableMultimap;
 import org.eclipse.collections.impl.factory.Lists;
 import org.eclipse.collections.impl.factory.Multimaps;
 
-import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-public class EventImpl<T> implements Event<T> {
+public class DefaultEvent<T> implements Event<T> {
 
-    private EventBusImpl eventBus;
+    private DefaultEventBus eventBus;
 
     private String name;
-
-    private InetAddress node;
 
     private MutableMultimap<String, String> headers;
 
@@ -31,12 +27,11 @@ public class EventImpl<T> implements Event<T> {
 
     private Handler<T> deadLetterHandler;
 
-    EventImpl(EventBusImpl eventBus, String name, InetAddress nodeAddress) {
+    public DefaultEvent(DefaultEventBus eventBus, String name) {
         this.headers = Multimaps.mutable.set.empty();
         this.filters = Lists.mutable.empty();
         this.eventBus = eventBus;
         this.name = name;
-        this.node = nodeAddress;
     }
 
     @Override
@@ -84,15 +79,6 @@ public class EventImpl<T> implements Event<T> {
         Future<Message<V>> future = null; // TODO put implementation here
         String address = UUID.randomUUID().toString();
 
-        eventBus.getEventRouter().registerHandler(address, (Message<V> response) -> {
-            if (response.failed()) {
-                future.fail(new EventResponseException(response.cause()));
-                return;
-            }
-
-            future.complete(response);
-        });
-
         return future;
     }
 
@@ -108,22 +94,22 @@ public class EventImpl<T> implements Event<T> {
 
     @Override
     public void consume(Handler<Message<T>> handler) {
-        eventBus.getEventRouter().<Message<T>>registerHandler(name, message -> {
-            if (filters.isEmpty()) {
-                handler.handle(message);
-            } else {
-                AtomicBoolean shouldExecute = new AtomicBoolean(true);
-                filters.forEach(p -> {
-                    //noinspection unchecked
-                    if (!p.test((T) message))
-                        shouldExecute.set(false);
-                });
-
-                if (shouldExecute.get()) {
-                    handler.handle(message);
-                }
-            }
-        });
+//        eventBus.getEventRouter().<Message<T>>registerHandler(name, message -> {
+//            if (filters.isEmpty()) {
+//                handler.handle(message);
+//            } else {
+//                AtomicBoolean shouldExecute = new AtomicBoolean(true);
+//                filters.forEach(p -> {
+//                    //noinspection unchecked
+//                    if (!p.test((T) message))
+//                        shouldExecute.set(false);
+//                });
+//
+//                if (shouldExecute.get()) {
+//                    handler.handle(message);
+//                }
+//            }
+//        });
     }
 
     @Override
