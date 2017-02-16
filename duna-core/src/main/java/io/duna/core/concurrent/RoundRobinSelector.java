@@ -1,47 +1,64 @@
 package io.duna.core.concurrent;
 
-import org.eclipse.collections.api.multimap.list.MutableListMultimap;
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.multimap.list.SynchronizedPutFastListMultimap;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class RoundRobinSelector<E> {
 
-    private final MutableListMultimap<Integer, E> countedElements;
+    private final NavigableSet<WeightedElement> elements;
 
     public RoundRobinSelector(Set<E> elements) {
-        this.countedElements = SynchronizedPutFastListMultimap.newMultimap();
-        elements.forEach(i -> countedElements.put(0, i));
+        this.elements = new ConcurrentSkipListSet<>();
+        elements.forEach(e -> this.elements.add(new WeightedElement(e, 0)));
     }
 
     public E next() {
-        Pair<Integer, E> pair;
+        WeightedElement current = elements.pollFirst();
+        current.weight++;
 
-        synchronized (countedElements) {
-            pair = countedElements
-                .keyValuePairsView()
-                .min(Comparator.comparingInt(Pair::getOne));
+        elements.add(current);
 
-            countedElements.remove(pair.getOne(), pair.getTwo());
-            countedElements.put(pair.getOne() + 1, pair.getTwo());
-        }
-
-        return pair.getTwo();
+        return current.element;
     }
 
     public void add(E element) {
-        countedElements.put(0, element);
+        elements.add(new WeightedElement(element, 0));
     }
 
     public void remove(E element) {
-        synchronized (countedElements) {
-            countedElements
-                .forEachKeyValue((k, v) -> {
-                    if (v.equals(element))
-                        countedElements.remove(k, v);
-                });
+        elements.removeIf(w -> w.element.equals(element));
+    }
+
+    private class WeightedElement implements Comparable<WeightedElement> {
+        E element;
+        int weight;
+
+        private WeightedElement(E element, int weight) {
+            this.element = element;
+            this.weight = weight;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            WeightedElement that = (WeightedElement) o;
+            return weight == that.weight &&
+                Objects.equals(element, that.element);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(element, weight);
+        }
+
+        @Override
+        public int compareTo(@NotNull WeightedElement o) {
+            return this.weight - o.weight;
         }
     }
 }

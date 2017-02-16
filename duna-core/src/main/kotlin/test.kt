@@ -1,6 +1,4 @@
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import org.eclipse.collections.impl.multimap.set.sorted.SynchronizedPutTreeSortedSetMultimap
 
 /**
  * Created by carlos on 09/02/17.
@@ -11,25 +9,26 @@ fun main(vararg args: String) {
 //    call()
 //  }
 
-  val runnable = object : Runnable {
-    override fun run() {
-      println(this.toString() + " " + Thread.currentThread())
-    }
-  }
+  val x = SynchronizedPutTreeSortedSetMultimap.newMultimap<Int, String>();
+  x.put(1, "a")
+  x.put(1, "b")
+  x.put(1, "c")
+  x.put(5, "d")
+  x.put(6, "d")
+  x.put(3, "d")
+  x.put(2, "e")
+  x.put(8, "d")
+  x.put(7, "d")
+  x.put(7, "e")
+  x.put(7, "f")
+  x.put(4, "d")
 
-  val t1 = Thread(runnable)
-  val t2 = Thread(runnable)
+  x.removeAll(1)
 
-  t1.start()
-  t2.start()
-}
+  println(x.keySet())
+  println(x.keyValuePairsView())
+  x.remove(7, "e")
+  x.remove(2, "e")
 
-suspend fun call() {
-  val f = launch(CommonPool) {
-    delay(1000L)
-    println("World!")
-  }
-
-  print("Hello, ")
-  f.join()
+  println(x.keyValuePairsView())
 }
