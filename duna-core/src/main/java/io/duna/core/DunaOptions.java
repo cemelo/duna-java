@@ -1,29 +1,35 @@
 package io.duna.core;
 
-import io.netty.channel.EventLoopGroup;
-
-import java.util.concurrent.ExecutorService;
-
 public class DunaOptions {
 
-    private EventLoopGroup eventLoopGroup;
-    private ExecutorService workerExecutor;
+    private int eventLoopThreads;
+    private int workerThreads;
+    private boolean useCommonWorkerPool;
 
-    public EventLoopGroup getEventLoopGroup() {
-        return eventLoopGroup;
+    public int getEventLoopThreads() {
+        return eventLoopThreads;
     }
 
-    public DunaOptions eventLoopGroup(EventLoopGroup eventLoopGroup) {
-        this.eventLoopGroup = eventLoopGroup;
+    public DunaOptions eventLoopThreads(int eventLoopThreads) {
+        this.eventLoopThreads = eventLoopThreads;
         return this;
     }
 
-    public ExecutorService getWorkerExecutor() {
-        return workerExecutor;
+    public int getWorkerThreads() {
+        return workerThreads;
     }
 
-    public DunaOptions workerExecutor(ExecutorService workerExecutor) {
-        this.workerExecutor = workerExecutor;
+    public DunaOptions workerThreads(int workerThreads) {
+        this.workerThreads = workerThreads;
+        return this;
+    }
+
+    public boolean isUseCommonWorkerPool() {
+        return useCommonWorkerPool;
+    }
+
+    public DunaOptions useCommonWorkerPool(boolean useCommonWorkerPool) {
+        this.useCommonWorkerPool = useCommonWorkerPool;
         return this;
     }
 }

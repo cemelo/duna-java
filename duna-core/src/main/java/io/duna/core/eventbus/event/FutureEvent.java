@@ -4,14 +4,12 @@ import io.duna.core.concurrent.future.AbstractFuture;
 import io.duna.core.concurrent.future.CompositeFuture;
 import io.duna.core.concurrent.future.Future;
 import io.duna.core.function.Handler;
-import io.netty.channel.EventLoop;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FutureEvent<T> extends AbstractFuture<T> {
 
     private String name;
-    private EventLoop executor;
 
     private volatile T result;
     private volatile Throwable error;
@@ -21,19 +19,23 @@ public class FutureEvent<T> extends AbstractFuture<T> {
 
     private final AtomicBoolean listenerCalled;
 
-    public FutureEvent(String name, EventLoop eventLoop) {
+    public FutureEvent(String name) {
         this.name = name;
-        this.executor = eventLoop;
         this.listenerCalled = new AtomicBoolean(false);
     }
 
     @Override
     public Future<T> onComplete(Handler<T> handler) {
+        if (completionHandler != null) {
+
+        }
+
         this.completionHandler = handler;
 
         if (completed()) {
             if (listenerCalled.compareAndSet(false, true)) {
-                executor.execute(() -> handler.handle(result));
+
+//                executor.execute(() -> handler.handle(result));
             }
         }
 
@@ -47,7 +49,7 @@ public class FutureEvent<T> extends AbstractFuture<T> {
 
         if (failed()) {
             if (listenerCalled.compareAndSet(false, true)) {
-                executor.execute(() -> errorHandler.handle((V) error));
+//                executor.execute(() -> errorHandler.handle((V) error));
             }
         }
 
@@ -60,7 +62,7 @@ public class FutureEvent<T> extends AbstractFuture<T> {
 
         if (cancelled()) {
             if (listenerCalled.compareAndSet(false, true)) {
-                executor.execute(() -> cancellationHandler.handle(null));
+//                executor.execute(() -> cancellationHandler.handle(null));
             }
         }
 
@@ -72,7 +74,7 @@ public class FutureEvent<T> extends AbstractFuture<T> {
         super.cancel();
 
         if (this.cancellationHandler != null && listenerCalled.compareAndSet(false, true)) {
-            executor.execute(() -> cancellationHandler.handle(null));
+//            executor.execute(() -> cancellationHandler.handle(null));
         }
     }
 
@@ -82,7 +84,7 @@ public class FutureEvent<T> extends AbstractFuture<T> {
 
         this.result = result;
         if (this.completionHandler != null && listenerCalled.compareAndSet(false, true)) {
-            executor.execute(() -> completionHandler.handle(result));
+//            executor.execute(() -> completionHandler.handle(result));
         }
     }
 
@@ -93,7 +95,7 @@ public class FutureEvent<T> extends AbstractFuture<T> {
 
         this.error = error;
         if (this.errorHandler != null && listenerCalled.compareAndSet(false, true)) {
-            executor.execute(() -> ((Handler<Throwable>) errorHandler).handle(error));
+//            executor.execute(() -> ((Handler<Throwable>) errorHandler).handle(error));
         }
     }
 

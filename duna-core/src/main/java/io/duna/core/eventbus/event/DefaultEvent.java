@@ -75,9 +75,9 @@ public class DefaultEvent<T> implements Event<T> {
     }
 
     @Override
-    public <V> Future<Message<V>> send(T message) {
-        Future<Message<V>> future = null; // TODO put implementation here
+    public <V> Future<Message<V>> emit(T message) {
         String address = UUID.randomUUID().toString();
+        Future<Message<V>> future = new FutureEvent<>(address);
 
         return future;
     }
@@ -93,23 +93,8 @@ public class DefaultEvent<T> implements Event<T> {
     }
 
     @Override
-    public void consume(Handler<Message<T>> handler) {
-//        eventBus.getEventRouter().<Message<T>>registerHandler(name, message -> {
-//            if (filters.isEmpty()) {
-//                handler.handle(message);
-//            } else {
-//                AtomicBoolean shouldExecute = new AtomicBoolean(true);
-//                filters.forEach(p -> {
-//                    //noinspection unchecked
-//                    if (!p.test((T) message))
-//                        shouldExecute.set(false);
-//                });
-//
-//                if (shouldExecute.get()) {
-//                    handler.handle(message);
-//                }
-//            }
-//        });
+    public void listen(Handler<Message<T>> handler) {
+
     }
 
     @Override

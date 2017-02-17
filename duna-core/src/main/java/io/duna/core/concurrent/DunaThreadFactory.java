@@ -14,12 +14,13 @@ public class DunaThreadFactory implements ThreadFactory {
     private WeakHashMap<DunaThread, Void> threads;
 
     public DunaThreadFactory() {
-        this("duna-");
+        this("duna");
     }
 
     public DunaThreadFactory(String threadPrefix) {
-        threadId = new AtomicInteger(0);
-        threads = new WeakHashMap<>();
+        this.threadId = new AtomicInteger(0);
+        this.threads = new WeakHashMap<>();
+        this.threadPrefix = threadPrefix;
     }
 
     @Override

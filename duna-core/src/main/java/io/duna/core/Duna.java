@@ -1,25 +1,17 @@
 package io.duna.core;
 
-import io.netty.channel.EventLoopGroup;
+import io.duna.core.eventbus.EventBus;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
+public interface Duna {
 
-public class Duna {
+    void start();
 
-    private AtomicReference<Void> state;
-    private EventLoopGroup executor;
-    private ExecutorService workerExecutor;
-    private HandlerManager handlerManager;
-    private DunaOptions options;
+    EventBus eventBus();
 
-    private Duna(DunaOptions options) {
-        executor = options.getEventLoopGroup();
-        workerExecutor = options.getWorkerExecutor();
+    HandlerManager handlerManager();
+
+    static Duna create(DunaOptions options) {
+        return new DunaImpl(options);
     }
 
-    public static Duna currentInstance() {
-        // NOOP
-        return null;
-    }
 }

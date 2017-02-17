@@ -23,19 +23,19 @@ public interface Event<T> {
 
     Future<Void> purge(Handler<?> handler);
 
-    <V> Future<Message<V>> send(T message);
+    <V> Future<Message<V>> emit(T message);
 
     Future<Void> publish(T message);
 
-    Future<Void> enqueue(T message);
+    void listen(Handler<Message<T>> consumer);
 
-    void consume(Handler<Message<T>> consumer);
+    Observable<T> observe();
+
+    Future<Void> enqueue(T message);
 
     default void dequeue(Handler<Message<T>> handler) {
         dequeue(handler, 0);
     }
 
     void dequeue(Handler<Message<T>> consumer, long interval);
-
-    Observable<T> observe();
 }

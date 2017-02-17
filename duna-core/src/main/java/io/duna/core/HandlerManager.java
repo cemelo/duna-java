@@ -1,43 +1,70 @@
 package io.duna.core;
 
-import io.duna.core.concurrent.RoundRobinSelector;
 import io.duna.core.function.Handler;
-import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.EventExecutor;
-import kotlin.Pair;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 
-import java.util.Collections;
-import java.util.Deque;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 
 public class HandlerManager {
 
-    private MutableMap<Handler<?>, RoundRobinSelector<ExecutorService>> handlerExecutors;
+    private MutableMap<Handler<?>, EventExecutor> handlerExecutorMapping;
+    private MutableMap<Handler<?>, Void> blockingHandlers;
 
-    private RoundRobinSelector<EventExecutor> executors;
+    private EventExecutorGroup handlerExecutors;
+    private ExecutorService workerExecutor;
 
-    public HandlerManager() {
-        handlerExecutors = new ConcurrentHashMap<>();
+    public HandlerManager(EventExecutorGroup handlerExecutors, ExecutorService workerExecutor) {
+        this.workerExecutor = workerExecutor;
+        this.handlerExecutors = handlerExecutors;
+
+        handlerExecutorMapping = new ConcurrentHashMap<>();
+        blockingHandlers = new ConcurrentHashMap<>();
     }
 
     public void register(Handler<?> handler) {
-        ExecutorService executor = executors.next();
-
-        handlerExecutors
-            .computeIfAbsent(handler, (k) -> new RoundRobinSelector<>(Collections.emptySet()))
-            .add(executor);
+        register(handler, false);
     }
 
-    public ExecutorService getExecutor(Handler<?> handler) {
-        if (!handlerExecutors.containsKey(handler))
+    public void register(Handler<?> handler, boolean blocking) {
+        if (handlerExecutorMapping.containsKey(handler) || blockingHandlers.containsKey(handler))
+            throw new IllegalArgumentException("Handler is already registered.");
+
+        if (blocking) {
+            blockingHandlers.put(handler, null);
+        } else {
+            handlerExecutorMapping.putIfAbsent(handler, handlerExecutors.next());
+        }
+    }
+
+    public void unregister(Handler<?> handler) {
+        handlerExecutorMapping.removeKey(handler);
+        blockingHandlers.removeKey(handler);
+    }
+
+    public EventExecutor getExecutor(Handler<?> handler) {
+        if (!handlerExecutorMapping.containsKey(handler))
             throw new IllegalStateException("Handler not registered.");
 
-        return handlerExecutors
-            .get(handler)
-            .next();
+        return handlerExecutorMapping.get(handler);
+    }
+
+    public <T> void execute(Task<T> task) {
+        if (!handlerExecutorMapping.containsKey(task.getHandler()) && !blockingHandlers.containsKey(task.getHandler()))
+            throw new IllegalArgumentException("Handler not registered.");
+
+        if (blockingHandlers.containsKey(task.getHandler())) {
+            workerExecutor.execute(() -> task.getHandler().handle(task.getArgument()));
+        } else {
+            EventExecutor executor = getExecutor(task.getHandler());
+
+            if (executor.inEventLoop()) {
+                task.getHandler().handle(task.getArgument());
+            } else {
+                executor.execute(() -> task.getHandler().handle(task.getArgument()));
+            }
+        }
     }
 }

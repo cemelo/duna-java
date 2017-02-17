@@ -20,6 +20,10 @@ public interface Future<T> {
 
     void complete(T result);
 
+    default void complete() {
+        complete(null);
+    }
+
     <V extends Throwable> void fail(V error);
 
     <V> CompositeFuture andThen(Handler<V> handler);

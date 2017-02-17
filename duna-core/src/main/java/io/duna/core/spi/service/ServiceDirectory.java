@@ -1,4 +1,4 @@
-package io.duna.core.spi;
+package io.duna.core.spi.service;
 
 public interface ServiceDirectory {
 }
