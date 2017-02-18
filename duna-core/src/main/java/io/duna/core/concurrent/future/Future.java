@@ -1,8 +1,10 @@
 package io.duna.core.concurrent.future;
 
-import io.duna.core.function.Handler;
+import io.duna.core.function.Consumer;
 
 public interface Future<T> {
+
+    boolean done();
 
     boolean completed();
 
@@ -10,11 +12,11 @@ public interface Future<T> {
 
     boolean cancelled();
 
-    Future<T> onComplete(Handler<T> handler);
+    Future<T> onComplete(Consumer<T> consumer);
 
-    <V extends Throwable> Future<T> onError(Handler<V> errorHandler);
+    Future<T> onError(Consumer<Throwable> errorConsumer);
 
-    Future<T> onCancel(Handler<Void> cancellationHandler);
+    Future<T> onCancel(Consumer<Void> cancellationConsumer);
 
     void cancel();
 
@@ -24,7 +26,6 @@ public interface Future<T> {
         complete(null);
     }
 
-    <V extends Throwable> void fail(V error);
+    void fail(Throwable error);
 
-    <V> CompositeFuture andThen(Handler<V> handler);
 }

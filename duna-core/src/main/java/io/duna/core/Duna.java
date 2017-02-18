@@ -1,17 +1,11 @@
 package io.duna.core;
 
-import io.duna.core.eventbus.EventBus;
+import io.duna.core.concurrent.future.Future;
 
 public interface Duna {
 
-    void start();
+    Future<Void> start();
 
-    EventBus eventBus();
-
-    HandlerManager handlerManager();
-
-    static Duna create(DunaOptions options) {
-        return new DunaImpl(options);
-    }
+    Future<Void> shutdown();
 
 }

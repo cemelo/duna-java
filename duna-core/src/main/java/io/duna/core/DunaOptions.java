@@ -2,34 +2,24 @@ package io.duna.core;
 
 public class DunaOptions {
 
-    private int eventLoopThreads;
-    private int workerThreads;
-    private boolean useCommonWorkerPool;
+    private int eventLoops;
+    private int workers;
 
-    public int getEventLoopThreads() {
-        return eventLoopThreads;
+    public int getEventLoops() {
+        return eventLoops;
     }
 
-    public DunaOptions eventLoopThreads(int eventLoopThreads) {
-        this.eventLoopThreads = eventLoopThreads;
+    public DunaOptions eventLoops(int eventLoops) {
+        this.eventLoops = eventLoops;
         return this;
     }
 
-    public int getWorkerThreads() {
-        return workerThreads;
+    public int getWorkers() {
+        return workers;
     }
 
-    public DunaOptions workerThreads(int workerThreads) {
-        this.workerThreads = workerThreads;
-        return this;
-    }
-
-    public boolean isUseCommonWorkerPool() {
-        return useCommonWorkerPool;
-    }
-
-    public DunaOptions useCommonWorkerPool(boolean useCommonWorkerPool) {
-        this.useCommonWorkerPool = useCommonWorkerPool;
+    public DunaOptions workers(int workers) {
+        this.workers = workers;
         return this;
     }
 }

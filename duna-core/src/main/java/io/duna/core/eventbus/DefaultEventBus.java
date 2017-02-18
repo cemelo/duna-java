@@ -1,37 +1,34 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.Duna;
-import io.duna.core.concurrent.future.Future;
-import io.duna.core.eventbus.event.DefaultEvent;
-import io.duna.core.function.Handler;
-
-import java.util.Set;
+import io.duna.core.eventbus.event.Event;
+import io.duna.core.eventbus.event.InboundEvent;
+import io.duna.core.eventbus.event.OutboundEvent;
 
 public class DefaultEventBus implements EventBus {
 
-    private Duna owner;
-    private EndpointDirectory endpointDirectory;
-
-    public DefaultEventBus(Duna owner) {
-        this.owner = owner;
-    }
 
     @Override
-    public <T> Event<T> event(String name) {
-        return new DefaultEvent<>(this, name);
-    }
-
-    @Override
-    public Future<EventBus> purgeAll() {
+    public <T> OutboundEvent<T> outbound(String name) {
         return null;
     }
 
     @Override
-    public Future<EventBus> purgeAll(Handler<Set<?>> handler) {
+    public <T> OutboundEvent<T> outbound(String name, int cost) {
         return null;
     }
 
-    public Duna getOwner() {
-        return this.owner;
+    @Override
+    public <T> InboundEvent<T> inbound(String name) {
+        return null;
+    }
+
+    @Override
+    public <T> InboundEvent<T> inbound(String name, int cost) {
+        return null;
+    }
+
+    @Override
+    public void dispatch(Event<?> event) {
+
     }
 }

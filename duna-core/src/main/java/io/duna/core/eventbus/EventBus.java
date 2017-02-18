@@ -1,15 +1,19 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.concurrent.future.Future;
-import io.duna.core.function.Handler;
-
-import java.util.Set;
+import io.duna.core.eventbus.event.Event;
+import io.duna.core.eventbus.event.InboundEvent;
+import io.duna.core.eventbus.event.OutboundEvent;
 
 public interface EventBus {
 
-    <T> Event<T> event(String name);
+    <T> OutboundEvent<T> outbound(String name);
 
-    Future<EventBus> purgeAll();
+    <T> OutboundEvent<T> outbound(String name, int cost);
 
-    Future<EventBus> purgeAll(Handler<Set<?>> handler);
+    <T> InboundEvent<T> inbound(String name);
+
+    <T> InboundEvent<T> inbound(String name, int cost);
+
+    void dispatch(Event<?> event);
+
 }
