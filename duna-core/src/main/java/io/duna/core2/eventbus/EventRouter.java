@@ -1,8 +1,10 @@
 package io.duna.core2.eventbus;
 
+import io.duna.core2.eventbus.event.Event;
+
 import java.net.InetAddress;
 
-public interface EventRegistry {
+public interface EventRouter {
 
     void register(Event<?> event);
 

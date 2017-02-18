@@ -10,17 +10,5 @@ public interface Duna {
     Future<Void> start();
 
     Future<Void> shutdown();
-
-    static Optional<EventBus> eventBus() {
-        Optional<Context> context = context();
-
-        if (context.isPresent())
-            return Optional.of(((DunaImpl) context().get().manager()).eventBus());
-        else
-            return Optional.empty();
-    }
-
-    static Optional<Context> context() {
-        return Optional.ofNullable(DunaImpl.context());
-    }
+    
 }

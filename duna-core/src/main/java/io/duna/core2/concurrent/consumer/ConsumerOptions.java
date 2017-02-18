@@ -1,4 +1,4 @@
-package io.duna.core2.concurrent.manager;
+package io.duna.core2.concurrent.consumer;
 
 public class ConsumerOptions {
 

@@ -1,8 +1,7 @@
-package io.duna.core2.concurrent.manager;
+package io.duna.core2.concurrent.consumer;
 
 import io.duna.core2.Context;
 import io.duna.core2.ContextImpl;
-import io.duna.core2.Duna;
 import io.duna.core2.DunaImpl;
 import io.duna.core2.function.Consumer;
 import io.netty.channel.EventLoopGroup;
@@ -20,14 +19,11 @@ public class ConsumerRegistry {
     private final DunaImpl manager;
     private final Map<Consumer<?>, ExecutorService> consumerExecutors;
 
-    private final EventLoopGroup eventExecutors;
-    private final ExecutorService workerPool;
-
     final NavigableSet<Pair<Integer, ExecutorService>> executorsQueue;
+    private final ExecutorService workerPool;
 
     public ConsumerRegistry(DunaImpl manager, EventLoopGroup eventExecutors, ExecutorService workerPool) {
         this.manager = manager;
-        this.eventExecutors = eventExecutors;
         this.workerPool = workerPool;
         this.consumerExecutors = new ConcurrentHashMap<>();
 
@@ -63,12 +59,14 @@ public class ConsumerRegistry {
         }
     }
 
-    private <T> void execute(Consumer<T> consumer, T offer) {
+    private <T> void execute(Consumer<T> consumer, T offer, Context context) {
         final ExecutorService executor = consumerExecutors.get(consumer);
-        final Context context = Duna.context().orElseGet(() -> new ContextImpl(manager));
+        final Context actualContext = (context != null)
+            ? context
+            : new ContextImpl(manager);
 
         executor.execute(() -> {
-            DunaImpl.setContextHolder(context);
+            ContextImpl.setContext(actualContext);
             consumer.accept(offer);
         });
     }
