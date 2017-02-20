@@ -3,10 +3,9 @@ package io.duna.core.concurrent.consumer;
 import io.duna.core.Context;
 import io.duna.core.ContextImpl;
 import io.duna.core.DunaImpl;
-import io.duna.core.function.Consumer;
+import io.duna.core.util.tuple.Pair;
 
 import io.netty.channel.EventLoopGroup;
-import kotlin.Pair;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -14,6 +13,7 @@ import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 public class ConsumerRegistry {
 

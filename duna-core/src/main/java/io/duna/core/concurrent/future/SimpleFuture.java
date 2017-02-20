@@ -1,8 +1,7 @@
 package io.duna.core.concurrent.future;
 
-import io.duna.core.function.Consumer;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class SimpleFuture<T> extends AbstractFuture<T> {
 

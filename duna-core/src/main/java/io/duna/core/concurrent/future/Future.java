@@ -1,6 +1,6 @@
 package io.duna.core.concurrent.future;
 
-import io.duna.core.function.Consumer;
+import java.util.function.Consumer;
 
 public interface Future<T> {
 

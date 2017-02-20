@@ -1,6 +1,5 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.eventbus.event.Event;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 
@@ -13,7 +12,5 @@ public interface EventBus {
     <T> InboundEvent<T> inbound(String name);
 
     <T> InboundEvent<T> inbound(String name, int cost);
-
-    void dispatch(Event<?> event);
 
 }

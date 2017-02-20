@@ -2,10 +2,10 @@ package io.duna.core.eventbus.event;
 
 import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
-import io.duna.core.function.Consumer;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
@@ -21,7 +21,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withFilter(Predicate<? super Message<T>> predicate) {
+    public OutboundEvent<T> withFilter(Predicate<Message<T>> predicate) {
         return null;
     }
 

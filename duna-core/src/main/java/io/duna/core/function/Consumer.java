@@ -1,6 +1,0 @@
-package io.duna.core.function;
-
-@FunctionalInterface
-public interface Consumer<T> {
-    void accept(T offer);
-}

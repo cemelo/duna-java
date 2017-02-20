@@ -4,6 +4,8 @@ import io.duna.core.eventbus.event.Event;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 
+import java.util.function.Consumer;
+
 public class DefaultEventBus implements EventBus {
 
 
@@ -27,8 +29,13 @@ public class DefaultEventBus implements EventBus {
         return null;
     }
 
-    @Override
-    public void dispatch(Event<?> event) {
+    public void register(Event<?> event) {
 
+    }
+
+    public <T> T poll(String eventName,
+                      Consumer<T> resultConsumer,
+                      Consumer<Throwable> errorConsumer) {
+        return null;
     }
 }
