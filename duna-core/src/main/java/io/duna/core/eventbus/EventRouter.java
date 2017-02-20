@@ -1,21 +1,20 @@
 package io.duna.core.eventbus;
 
 import io.duna.core.eventbus.event.Event;
-
-import java.net.InetAddress;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface EventRouter {
 
-    void register(Event<?> event);
+    void register(@NotNull Event<?> event);
 
-    void remove(String eventName);
+    void cancel(@NotNull String eventName);
 
-    default void remove(Event<?> event) {
-        remove(event.getName());
+    default void cancel(Event<?> event) {
+        cancel(event.getName());
     }
 
-    InetAddress getNode(Event<?> event);
-
-    Iterable<InetAddress> getAllNodes(Event<?> event);
+    @Nullable
+    Event<?> get(String eventName);
 
 }

@@ -15,12 +15,11 @@
  *
  */
 
-package io.duna.core.concurrent;
+package io.duna.core.internal.concurrent;
 
 import io.duna.core.Context;
-import io.duna.core.ContextImpl;
 import io.duna.core.Duna;
-
+import io.duna.core.internal.ContextImpl;
 import net.openhft.affinity.AffinityLock;
 import net.openhft.affinity.AffinityStrategies;
 import net.openhft.affinity.AffinityStrategy;

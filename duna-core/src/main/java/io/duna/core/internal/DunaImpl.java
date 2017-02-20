@@ -1,12 +1,14 @@
-package io.duna.core;
+package io.duna.core.internal;
 
-import io.duna.core.concurrent.DunaAffinityThreadFactory;
+import io.duna.core.Context;
+import io.duna.core.Duna;
+import io.duna.core.DunaOptions;
 import io.duna.core.concurrent.consumer.ConsumerRegistry;
 import io.duna.core.concurrent.future.Future;
-import io.duna.core.concurrent.future.SimpleFuture;
 import io.duna.core.eventbus.EventBus;
+import io.duna.core.internal.concurrent.DunaAffinityThreadFactory;
+import io.duna.core.internal.concurrent.future.SimpleFuture;
 import io.duna.core.service.spi.ServiceProvider;
-
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
 import net.openhft.affinity.AffinityStrategies;

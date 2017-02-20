@@ -1,10 +1,9 @@
 package io.duna.core.concurrent.consumer;
 
 import io.duna.core.Context;
-import io.duna.core.ContextImpl;
-import io.duna.core.DunaImpl;
+import io.duna.core.internal.ContextImpl;
+import io.duna.core.internal.DunaImpl;
 import io.duna.core.util.tuple.Pair;
-
 import io.netty.channel.EventLoopGroup;
 
 import java.util.Iterator;

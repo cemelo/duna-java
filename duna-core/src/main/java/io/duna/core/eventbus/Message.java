@@ -1,14 +1,16 @@
 package io.duna.core.eventbus;
 
-import java.util.Map;
+import org.eclipse.collections.api.multimap.Multimap;
 
 public interface Message<T> {
 
     String getSource();
 
+    String getTarget();
+
     String getResponseEvent();
 
-    Map<String, String> getHeaders();
+    Multimap<String, String> getHeaders();
 
     T getBody();
 
@@ -17,4 +19,9 @@ public interface Message<T> {
     boolean succeeded();
 
     boolean failed();
+
+    <V> void reply(V response);
+
+    void fail(Throwable t);
+
 }

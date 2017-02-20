@@ -1,4 +1,6 @@
-package io.duna.core.concurrent.future;
+package io.duna.core.internal.concurrent.future;
+
+import io.duna.core.concurrent.future.Future;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;

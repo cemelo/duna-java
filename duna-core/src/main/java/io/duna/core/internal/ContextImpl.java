@@ -1,4 +1,7 @@
-package io.duna.core;
+package io.duna.core.internal;
+
+import io.duna.core.Context;
+import io.duna.core.Duna;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +18,7 @@ public class ContextImpl implements Context {
         this.data = new ConcurrentHashMap<>();
     }
 
-    static Context currentContext() {
+    public static Context currentContext() {
         return contextHolder.get();
     }
 

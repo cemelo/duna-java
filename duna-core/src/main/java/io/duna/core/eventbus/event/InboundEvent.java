@@ -2,8 +2,7 @@ package io.duna.core.eventbus.event;
 
 import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
-
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -21,11 +20,10 @@ public interface InboundEvent<T> extends Event<Message<T>> {
 
     InboundEvent<T> withErrorSink(Consumer<Message<T>> errorSink);
 
-    void listen(Consumer<Message<T>> eventConsumer);
+    void addListener(Consumer<Message<T>> consumer);
 
-    Future<T> poll();
+    Future<T> poll(String queue);
 
-    Observable<T> toObservable();
+    Flowable<T> stream();
 
-    void accept(Message<T> message);
 }

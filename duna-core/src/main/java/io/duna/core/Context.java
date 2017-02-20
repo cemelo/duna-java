@@ -1,5 +1,7 @@
 package io.duna.core;
 
+import io.duna.core.internal.ContextImpl;
+
 import java.util.Map;
 
 public interface Context {
