@@ -61,6 +61,9 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
     @Override
     public InboundEvent<T> setCost(int cost) {
+        if (cost < 0)
+            throw new IllegalArgumentException("The event cost must be a positive integer.");
+
         this.cost = cost;
         return this;
     }

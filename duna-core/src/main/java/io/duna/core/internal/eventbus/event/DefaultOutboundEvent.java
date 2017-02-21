@@ -60,6 +60,9 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     @Override
     public OutboundEvent<T> setCost(int cost) {
+        if (cost < 0)
+            throw new IllegalArgumentException("The event cost must be a positive integer.");
+
         this.cost = cost;
         return this;
     }
