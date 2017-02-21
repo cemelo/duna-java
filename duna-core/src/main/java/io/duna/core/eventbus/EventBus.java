@@ -1,5 +1,6 @@
 package io.duna.core.eventbus;
 
+import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 
@@ -17,7 +18,9 @@ public interface EventBus {
 
     <T> InboundEvent<T> inbound(String name, int cost);
 
-    <T> void dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer);
+    <T> Future<Void> dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer);
+
+    <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer);
 
     <T> void process(Message<T> incoming);
 

@@ -1,6 +1,7 @@
 package io.duna.core.eventbus;
 
 import io.duna.core.eventbus.event.Event;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,5 +17,7 @@ public interface EventRouter {
 
     @Nullable
     Event<?> get(String eventName);
+
+    boolean contains(String eventName);
 
 }

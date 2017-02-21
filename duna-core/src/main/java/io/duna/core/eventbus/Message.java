@@ -8,7 +8,7 @@ public interface Message<T> {
 
     String getTarget();
 
-    String getResponseEvent();
+    String getRespondTo();
 
     Multimap<String, String> getHeaders();
 

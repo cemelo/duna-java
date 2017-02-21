@@ -6,10 +6,12 @@ import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
 import io.duna.core.internal.eventbus.LocalEventBus;
 import io.duna.core.util.internal;
+
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -25,14 +27,13 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
     private Consumer<Message<T>> interceptor;
 
     private Consumer<Message<T>> errorSink;
-    private Consumer<Message<T>> eventSink;
+    private final AtomicReference<Consumer<Message<T>>> eventSink;
 
     private Flowable<T> flowable;
 
     public DefaultInboundEvent(LocalEventBus eventBus, String name) {
         this.eventBus = eventBus;
-        this.eventSink = m -> {
-        };
+        this.eventSink = new AtomicReference<>(m -> {});
         this.name = name;
     }
 
@@ -83,7 +84,9 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
     @Override
     public void addListener(Consumer<Message<T>> consumer) {
         Objects.requireNonNull(consumer, () -> "The consumer cannot be null.");
-        this.eventSink = this.eventSink.andThen(consumer);
+        this.eventSink.updateAndGet(c -> c.andThen(consumer));
+
+        eventBus.register(this);
     }
 
     @Override
@@ -91,7 +94,7 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
         Objects.requireNonNull(queue, () -> "The target queue name cannot be null.");
 
         Future<T> future = new SimpleFuture<>();
-        this.stream()
+        this.asFlowable()
             .take(1)
             .doOnError(future::fail)
             .subscribe(future::complete);
@@ -102,7 +105,7 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
     }
 
     @Override
-    public Flowable<T> stream() {
+    public Flowable<T> asFlowable() {
         if (this.flowable != null)
             return this.flowable;
 
@@ -110,12 +113,12 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
             emitter -> {
                 eventBus.register(this);
 
-                eventSink = eventSink.andThen(m -> {
-                    if (emitter.isCancelled()) return;
+                eventSink.updateAndGet(c -> c.andThen(m -> {
+                        if (emitter.isCancelled()) return;
 
-                    if (m.failed()) emitter.onError(m.getCause());
-                    if (m.succeeded()) emitter.onNext(m.getBody());
-                });
+                        if (m.failed()) emitter.onError(m.getCause());
+                        if (m.succeeded()) emitter.onNext(m.getBody());
+                    }));
 
                 emitter.setCancellable(() -> eventBus.cancel(this));
             }, BackpressureStrategy.BUFFER)
@@ -130,6 +133,6 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
             errorSink.accept(message);
         }
 
-        eventSink.accept(message);
+        eventSink.get().accept(message);
     }
 }

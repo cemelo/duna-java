@@ -5,17 +5,17 @@ import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 import io.duna.core.internal.eventbus.LocalEventBus;
-import io.duna.core.util.internal;
+import io.duna.core.internal.eventbus.SimpleMessage;
+
 import org.eclipse.collections.api.multimap.MutableMultimap;
+import org.eclipse.collections.impl.factory.Multimaps;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
-public
-@internal
-class DefaultOutboundEvent<T> implements OutboundEvent<T> {
+public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     private final LocalEventBus eventBus;
     private final String name;
@@ -32,6 +32,7 @@ class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     public DefaultOutboundEvent(LocalEventBus eventBus, String name) {
         this.eventBus = eventBus;
         this.name = name;
+        this.headers = Multimaps.mutable.set.empty();
     }
 
     @Override
@@ -102,7 +103,9 @@ class DefaultOutboundEvent<T> implements OutboundEvent<T> {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(values, () -> "Header values must be not null.");
 
-        StreamSupport.stream(Spliterators.spliteratorUnknownSize(values, Spliterator.DISTINCT), false)
+        StreamSupport
+            .stream(Spliterators.spliteratorUnknownSize(values, Spliterator.DISTINCT),
+                false)
             .filter(Objects::nonNull)
             .forEach(v -> headers.put(key, v));
 
@@ -130,23 +133,36 @@ class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     @Override
     public OutboundEvent<T> withDeadLetterSink(Consumer<Message<T>> deadLetterConsumer) {
+        Objects.requireNonNull(deadLetterConsumer,
+            () -> "The dead letter consumer must be not null.");
         this.deadLetterSink = deadLetterConsumer;
         return this;
     }
 
     @Override
-    public <V> InboundEvent<Message<V>> send() {
-        return null;
+    public <V> InboundEvent<V> send() {
+        InboundEvent<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
+        responseEvent
+            .withCost(this.cost)
+            .addListener(m -> eventBus.cancel(responseEvent));
+
+        eventBus.register(responseEvent);
+
+        emit(responseEvent.getName(), responseEvent.getName());
+
+        return responseEvent;
     }
 
     @Override
-    public <V> void send(Consumer<Message<V>> responseConsumer) {
-
+    public <V> void send(Consumer<Message<V>> response) {
+        Objects.requireNonNull(response, () -> "The response consumer must be not null.");
+        this.<V> send().addListener(response);
     }
 
     @Override
     public Future<Void> emit() {
-        return null;
+        // TODO the source event should be collected from the Context
+        return emit(UUID.randomUUID().toString(), null);
     }
 
     @Override
@@ -157,5 +173,18 @@ class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     @Override
     public Future<Void> enqueue() {
         return null;
+    }
+
+    private Future<Void> emit(String sourceEvent, String responseEvent) {
+        Message<T> output = SimpleMessage.<T> builder()
+            .source(sourceEvent)
+            .target(this.getName())
+            .responseEvent(responseEvent)
+            .body(this.body)
+            .headers(this.headers)
+            .parent(this.eventBus)
+            .build();
+
+        return eventBus.dispatch(output, this.deadLetterSink);
     }
 }

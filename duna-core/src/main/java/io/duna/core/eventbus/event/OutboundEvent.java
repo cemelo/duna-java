@@ -31,9 +31,9 @@ public interface OutboundEvent<T> extends Event<Message<T>> {
 
     OutboundEvent<T> withDeadLetterSink(Consumer<Message<T>> deadLetterConsumer);
 
-    <V> InboundEvent<Message<V>> send();
+    <V> InboundEvent<V> send();
 
-    <V> void send(Consumer<Message<V>> responseConsumer);
+    <V> void send(Consumer<Message<V>> response);
 
     Future<Void> emit();
 

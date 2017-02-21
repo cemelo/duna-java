@@ -1,5 +1,6 @@
 package io.duna.core.internal.eventbus;
 
+import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.EventBus;
 import io.duna.core.eventbus.EventRouter;
 import io.duna.core.eventbus.Message;
@@ -7,6 +8,7 @@ import io.duna.core.eventbus.event.Event;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 import io.duna.core.internal.eventbus.event.DefaultInboundEvent;
+import io.duna.core.internal.eventbus.event.DefaultOutboundEvent;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -15,14 +17,18 @@ public class LocalEventBus implements EventBus {
 
     private EventRouter router;
 
+    public LocalEventBus() {
+        this.router = new LocalEventRouter();
+    }
+
     @Override
     public <T> OutboundEvent<T> outbound(String name) {
-        return null;
+        return new DefaultOutboundEvent<T>(this, name);
     }
 
     @Override
     public <T> OutboundEvent<T> outbound(String name, int cost) {
-        return null;
+        return new DefaultOutboundEvent<T>(this, name).withCost(cost);
     }
 
     @Override
@@ -42,22 +48,44 @@ public class LocalEventBus implements EventBus {
     }
 
     @Override
-    public <T> void dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer) {
+    public <T> Future<Void> dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer) {
         process(outgoing); // Dispatches to the local eventbus
+        return Future.completedFuture();
+    }
+
+    @Override
+    public <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>>
+        deliveryErrorConsumer) {
+
+        /* The implementation here is the same as `dispatch` because you can only have
+         * one event registered per eventbus node. In distributed environments,
+         * this should broadcast the message to all nodes in the cluster.
+         */
+        process(outgoing);
+        return Future.completedFuture();
     }
 
     @Override
     public <T> void process(Message<T> incoming) {
         Event<?> inbound = router.get(incoming.getTarget());
 
-        if (inbound instanceof DefaultInboundEvent) {
+        if (inbound == null) {
+            // Log and exit
+            return;
+        }
 
+        if (inbound instanceof DefaultInboundEvent) {
+            // Should accept in another event loop
+            ((DefaultInboundEvent<T>) inbound).accept(incoming);
         }
     }
 
-    public void register(Event<?> event) {
-        // Registers the event to the router
+    public boolean register(Event<?> event) {
+        if (router.contains(event.getName()))
+            return false;
+
         router.register(event);
+        return true;
     }
 
     public void cancel(Event<?> event) {

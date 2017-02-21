@@ -1,41 +1,69 @@
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
-import kotlin.concurrent.thread
+import io.duna.core.internal.eventbus.LocalEventBus
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.yield
 
-fun main(vararg args: String) {
-  val flowable = Flowable.create<Int>({ emitter ->
-    println("Inside create.")
-    if (emitter.isCancelled) println("Cancelled")
-    var a = 0
+val context = newSingleThreadContext("single")
 
-    thread {
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      Thread.sleep(1000)
+suspend fun run() {
+  val eventBus = LocalEventBus()
 
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      Thread.sleep(1000)
-
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onNext(a++)
-      emitter.onComplete()
+  eventBus.inbound<Int>("test")
+    .addListener {
+      println("Source: ${it.source}, Target: ${it.target}")
+      println(it.body)
     }
 
-  }, BackpressureStrategy.BUFFER)
-    .publish()
-    .refCount()
+  eventBus.inbound<Int>("test2")
+    .addListener {
+      println(it.target)
+      println(it.body)
+    }
 
-  flowable.subscribe(::println)
-  flowable.take(1).subscribe { println("A: $it") }
-  Thread.sleep(1200)
-  flowable.take(1).subscribe { println("B: $it") }
-  Thread.sleep(1000)
+  launch(context) {
+    eventBus.outbound<Int>("test")
+      .withBody(1)
+      .emit()
+
+    yield()
+
+    eventBus.outbound<Int>("test")
+      .withBody(2)
+      .emit()
+
+    yield()
+
+    eventBus.outbound<Int>("test")
+      .withBody(3)
+      .emit()
+  }
+
+  launch(context) {
+    println("Yelded")
+  }
+
+  launch(context) {
+    eventBus.outbound<Int>("test2")
+      .withBody(4)
+      .emit()
+
+    yield()
+
+    eventBus.outbound<Int>("test2")
+      .withBody(5)
+      .emit()
+
+    yield()
+
+    eventBus.outbound<Int>("test2")
+      .withBody(6)
+      .emit()
+  }
+}
+
+fun main(vararg args: String){
+  runBlocking(context) {
+    run()
+  }
 }

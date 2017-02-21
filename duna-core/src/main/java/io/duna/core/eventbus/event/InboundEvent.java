@@ -2,6 +2,7 @@ package io.duna.core.eventbus.event;
 
 import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
+
 import io.reactivex.Flowable;
 
 import java.util.function.Consumer;
@@ -24,6 +25,6 @@ public interface InboundEvent<T> extends Event<Message<T>> {
 
     Future<T> poll(String queue);
 
-    Flowable<T> stream();
+    Flowable<T> asFlowable();
 
 }
