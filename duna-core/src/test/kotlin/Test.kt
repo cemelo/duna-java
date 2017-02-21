@@ -1,10 +1,9 @@
 import io.duna.core.internal.eventbus.LocalEventBus
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.newFixedThreadPoolContext
 import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.yield
 
-val context = newSingleThreadContext("single")
+val context = newFixedThreadPoolContext(2, "test")
 
 suspend fun run() {
   val eventBus = LocalEventBus()
@@ -16,26 +15,20 @@ suspend fun run() {
     }
 
   eventBus.inbound<Int>("test2")
-    .addListener {
-      println(it.target)
-      println(it.body)
-    }
+    .asFlowable()
+    .subscribe(::println)
 
-  launch(context) {
+  val v1 = launch(context) {
     eventBus.outbound<Int>("test")
-      .withBody(1)
+      .setBody(1)
       .emit()
 
-    yield()
-
     eventBus.outbound<Int>("test")
-      .withBody(2)
+      .setBody(2)
       .emit()
 
-    yield()
-
     eventBus.outbound<Int>("test")
-      .withBody(3)
+      .setBody(3)
       .emit()
   }
 
@@ -43,23 +36,22 @@ suspend fun run() {
     println("Yelded")
   }
 
-  launch(context) {
+  val v2 = launch(context) {
     eventBus.outbound<Int>("test2")
-      .withBody(4)
+      .setBody(4)
       .emit()
 
-    yield()
-
     eventBus.outbound<Int>("test2")
-      .withBody(5)
+      .setBody(5)
       .emit()
 
-    yield()
-
     eventBus.outbound<Int>("test2")
-      .withBody(6)
+      .setBody(6)
       .emit()
   }
+
+  v1.join()
+  v2.join()
 }
 
 fun main(vararg args: String){

@@ -11,25 +11,25 @@ import java.util.function.Predicate;
 public interface OutboundEvent<T> extends Event<Message<T>> {
 
     @Override
-    OutboundEvent<T> withCost(int cost);
+    OutboundEvent<T> setCost(int cost);
 
     @Override
-    OutboundEvent<T> withFilter(Predicate<Message<T>> predicate);
+    OutboundEvent<T> setFilter(Predicate<Message<T>> predicate);
 
     @Override
-    OutboundEvent<T> withInterceptor(Consumer<Message<T>> interceptor);
+    OutboundEvent<T> setInterceptor(Consumer<Message<T>> interceptor);
 
-    OutboundEvent<T> withHeader(String key, String value);
+    OutboundEvent<T> setHeader(String key, String value);
 
-    OutboundEvent<T> withHeader(String key, String ... values);
+    OutboundEvent<T> setHeader(String key, String... values);
 
-    OutboundEvent<T> withHeader(String key, Iterator<String> values);
+    OutboundEvent<T> setHeader(String key, Iterator<String> values);
 
-    OutboundEvent<T> withHeader(Map<String, String> headers);
+    OutboundEvent<T> setHeader(Map<String, String> headers);
 
-    OutboundEvent<T> withBody(T body);
+    OutboundEvent<T> setBody(T body);
 
-    OutboundEvent<T> withDeadLetterSink(Consumer<Message<T>> deadLetterConsumer);
+    OutboundEvent<T> setDeadLetterSink(Consumer<Message<T>> deadLetterConsumer);
 
     <V> InboundEvent<V> send();
 

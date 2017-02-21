@@ -5,8 +5,6 @@ import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
 import io.duna.core.internal.eventbus.LocalEventBus;
-import io.duna.core.util.internal;
-
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
@@ -15,13 +13,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public
-@internal
-class DefaultInboundEvent<T> implements InboundEvent<T> {
+public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
     private final LocalEventBus eventBus;
     private final String name;
     private int cost;
+    private boolean blocking;
 
     private Predicate<Message<T>> filter;
     private Consumer<Message<T>> interceptor;
@@ -58,35 +55,47 @@ class DefaultInboundEvent<T> implements InboundEvent<T> {
     }
 
     @Override
-    public InboundEvent<T> withCost(int cost) {
+    public boolean isBlocking() {
+        return blocking;
+    }
+
+    @Override
+    public InboundEvent<T> setCost(int cost) {
         this.cost = cost;
         return this;
     }
 
     @Override
-    public InboundEvent<T> withFilter(Predicate<Message<T>> predicate) {
+    public InboundEvent<T> setFilter(Predicate<Message<T>> predicate) {
         this.filter = predicate;
         return this;
     }
 
     @Override
-    public InboundEvent<T> withInterceptor(Consumer<Message<T>> interceptor) {
+    public InboundEvent<T> setInterceptor(Consumer<Message<T>> interceptor) {
         this.interceptor = interceptor;
         return this;
     }
 
     @Override
-    public InboundEvent<T> withErrorSink(Consumer<Message<T>> errorSink) {
+    public InboundEvent<T> setErrorSink(Consumer<Message<T>> errorSink) {
         this.errorSink = errorSink;
         return this;
     }
 
     @Override
-    public void addListener(Consumer<Message<T>> consumer) {
+    public InboundEvent<T> setBlocking(boolean blocking) {
+        this.blocking = blocking;
+        return this;
+    }
+
+    @Override
+    public InboundEvent<T> addListener(Consumer<Message<T>> consumer) {
         Objects.requireNonNull(consumer, () -> "The consumer cannot be null.");
         this.eventSink.updateAndGet(c -> c.andThen(consumer));
 
         eventBus.register(this);
+        return this;
     }
 
     @Override

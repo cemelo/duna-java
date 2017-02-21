@@ -6,7 +6,6 @@ import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
 import io.duna.core.internal.eventbus.LocalEventBus;
 import io.duna.core.internal.eventbus.SimpleMessage;
-
 import org.eclipse.collections.api.multimap.MutableMultimap;
 import org.eclipse.collections.impl.factory.Multimaps;
 
@@ -60,25 +59,25 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withCost(int cost) {
+    public OutboundEvent<T> setCost(int cost) {
         this.cost = cost;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> withFilter(Predicate<Message<T>> predicate) {
+    public OutboundEvent<T> setFilter(Predicate<Message<T>> predicate) {
         this.filter = predicate;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> withInterceptor(Consumer<Message<T>> interceptor) {
+    public OutboundEvent<T> setInterceptor(Consumer<Message<T>> interceptor) {
         this.interceptor = interceptor;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> withHeader(String key, String value) {
+    public OutboundEvent<T> setHeader(String key, String value) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(value, () -> "Header value must be not null.");
 
@@ -87,7 +86,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withHeader(String key, String... values) {
+    public OutboundEvent<T> setHeader(String key, String... values) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(values, () -> "Header values must be not null.");
 
@@ -99,7 +98,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withHeader(String key, Iterator<String> values) {
+    public OutboundEvent<T> setHeader(String key, Iterator<String> values) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(values, () -> "Header values must be not null.");
 
@@ -113,7 +112,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withHeader(Map<String, String> headers) {
+    public OutboundEvent<T> setHeader(Map<String, String> headers) {
         Objects.requireNonNull(headers, () -> "Headers map must be not null.");
 
         headers.entrySet()
@@ -126,13 +125,13 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> withBody(T body) {
+    public OutboundEvent<T> setBody(T body) {
         this.body = body;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> withDeadLetterSink(Consumer<Message<T>> deadLetterConsumer) {
+    public OutboundEvent<T> setDeadLetterSink(Consumer<Message<T>> deadLetterConsumer) {
         Objects.requireNonNull(deadLetterConsumer,
             () -> "The dead letter consumer must be not null.");
         this.deadLetterSink = deadLetterConsumer;
@@ -143,7 +142,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     public <V> InboundEvent<V> send() {
         InboundEvent<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
         responseEvent
-            .withCost(this.cost)
+            .setCost(this.cost)
             .addListener(m -> eventBus.cancel(responseEvent));
 
         eventBus.register(responseEvent);

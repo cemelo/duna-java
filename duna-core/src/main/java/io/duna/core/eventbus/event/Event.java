@@ -13,10 +13,10 @@ public interface Event<T> {
 
     Consumer<T> getInterceptor();
 
-    Event<T> withCost(int cost);
+    Event<T> setCost(int cost);
 
-    Event<T> withFilter(Predicate<T> predicate);
+    Event<T> setFilter(Predicate<T> predicate);
 
-    Event<T> withInterceptor(Consumer<T> interceptor);
+    Event<T> setInterceptor(Consumer<T> interceptor);
 
 }

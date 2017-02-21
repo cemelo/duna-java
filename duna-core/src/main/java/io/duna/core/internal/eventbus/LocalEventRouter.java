@@ -2,16 +2,19 @@ package io.duna.core.internal.eventbus;
 
 import io.duna.core.eventbus.EventRouter;
 import io.duna.core.eventbus.event.Event;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 public class LocalEventRouter implements EventRouter {
 
     private Map<String, Event<?>> events;
+
+    private Map<Event<?>, ExecutorService> eventExecutors;
+    private ExecutorService workerExecutor;
 
     LocalEventRouter() {
         this.events = new ConcurrentHashMap<>();

@@ -28,7 +28,7 @@ public class LocalEventBus implements EventBus {
 
     @Override
     public <T> OutboundEvent<T> outbound(String name, int cost) {
-        return new DefaultOutboundEvent<T>(this, name).withCost(cost);
+        return new DefaultOutboundEvent<T>(this, name).setCost(cost);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class LocalEventBus implements EventBus {
 
     @Override
     public <T> InboundEvent<T> inbound(String name, int cost) {
-        return new DefaultInboundEvent<T>(this, name).withCost(cost);
+        return new DefaultInboundEvent<T>(this, name).setCost(cost);
     }
 
     @Override
@@ -54,8 +54,7 @@ public class LocalEventBus implements EventBus {
     }
 
     @Override
-    public <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>>
-        deliveryErrorConsumer) {
+    public <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer) {
 
         /* The implementation here is the same as `dispatch` because you can only have
          * one event registered per eventbus node. In distributed environments,
@@ -67,6 +66,7 @@ public class LocalEventBus implements EventBus {
 
     @Override
     public <T> void process(Message<T> incoming) {
+        // Process the event in the thread corresponding to the event
         Event<?> inbound = router.get(incoming.getTarget());
 
         if (inbound == null) {
