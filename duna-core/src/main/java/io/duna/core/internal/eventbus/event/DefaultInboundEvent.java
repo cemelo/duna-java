@@ -4,7 +4,8 @@ import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
-import io.duna.core.internal.eventbus.LocalEventBus;
+import io.duna.core.internal.eventbus.MultithreadedEventBus;
+
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
@@ -15,7 +16,7 @@ import java.util.function.Predicate;
 
 public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
-    private final LocalEventBus eventBus;
+    private final MultithreadedEventBus eventBus;
     private final String name;
     private int cost;
     private boolean blocking;
@@ -28,7 +29,7 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
     private Flowable<T> flowable;
 
-    public DefaultInboundEvent(LocalEventBus eventBus, String name) {
+    public DefaultInboundEvent(MultithreadedEventBus eventBus, String name) {
         this.eventBus = eventBus;
         this.eventSink = new AtomicReference<>(m -> {});
         this.name = name;
@@ -141,10 +142,14 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
     public void accept(Message<T> message) {
         Objects.requireNonNull(message, () -> "Message cannot be null.");
 
-        if (message.failed() && errorSink != null) {
-            errorSink.accept(message);
-        }
+        interceptor.accept(message);
 
-        eventSink.get().accept(message);
+        if (filter.test(message)) {
+            if (message.failed() && errorSink != null) {
+                errorSink.accept(message);
+            }
+
+            eventSink.get().accept(message);
+        }
     }
 }

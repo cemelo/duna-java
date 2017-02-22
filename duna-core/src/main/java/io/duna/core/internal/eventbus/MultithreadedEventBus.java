@@ -9,22 +9,25 @@ import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.Event;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
+import io.duna.core.eventbus.queue.EventQueue;
+import io.duna.core.eventbus.queue.InvalidQueueException;
+import io.duna.core.eventbus.queue.QueueItemRefusedException;
 import io.duna.core.internal.ContextImpl;
 import io.duna.core.internal.eventbus.event.DefaultInboundEvent;
 import io.duna.core.internal.eventbus.event.DefaultOutboundEvent;
 import io.duna.core.util.tuple.Pair;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class LocalEventBus implements EventBus {
+public class MultithreadedEventBus implements EventBus {
 
     private final Duna manager;
     private final EventRouter router;
@@ -34,10 +37,13 @@ public class LocalEventBus implements EventBus {
 
     private final NavigableSet<Pair<Integer, ExecutorService>> executorsQueue;
 
-    public LocalEventBus(@NotNull Duna manager,
-                         @NotNull Iterable<ExecutorService> eventExecutors,
-                         @NotNull ExecutorService workerExecutor) {
+    private final Map<String, EventQueue<?>> queues;
+
+    public MultithreadedEventBus(@NotNull Duna manager,
+                                 @NotNull Iterable<ExecutorService> eventExecutors,
+                                 @NotNull ExecutorService workerExecutor) {
         this.manager = manager;
+        this.queues = new ConcurrentHashMap<>();
         this.router = new LocalEventRouter();
 
         this.eventExecutors = new ConcurrentHashMap<>();
@@ -59,34 +65,18 @@ public class LocalEventBus implements EventBus {
     }
 
     @Override
-    public <T> OutboundEvent<T> outbound(String name, int cost) {
-        return new DefaultOutboundEvent<T>(this, name).setCost(cost);
-    }
-
-    @Override
-    public <T> InboundEvent<T> inbound() {
-        return new DefaultInboundEvent<>(this, UUID.randomUUID().toString());
-    }
-
-    @Override
     public <T> InboundEvent<T> inbound(String name) {
         return new DefaultInboundEvent<>(this, name);
     }
 
     @Override
-    public <T> InboundEvent<T> inbound(String name, int cost) {
-        return new DefaultInboundEvent<T>(this, name).setCost(cost);
-    }
-
-    @Override
     public <T> Future<Void> dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer) {
-        process(outgoing); // Dispatches to the local eventbus
+        process(outgoing);
         return Future.completedFuture();
     }
 
     @Override
     public <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer) {
-
         /* The implementation here is the same as `dispatch` because you can only have
          * one event registered per eventbus node. In distributed environments,
          * this should broadcast the message to all nodes in the cluster.
@@ -96,6 +86,12 @@ public class LocalEventBus implements EventBus {
     }
 
     @Override
+    public <T> void registerQueue(EventQueue<T> producer) {
+        queues.put(producer.getName(), producer);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> void process(Message<T> incoming) {
         if (!router.contains(incoming.getTarget())) {
             // The event isn't registered with this eventbus node
@@ -109,20 +105,20 @@ public class LocalEventBus implements EventBus {
             Context context = new ContextImpl(manager);
             context.put("current-event", inbound);
 
+            Runnable code = () -> {
+                ContextImpl.setContext(context);
+                ((DefaultInboundEvent<T>) inbound).accept(incoming);
+                ContextImpl.setContext(null);
+            };
+
             if (((DefaultInboundEvent) inbound).isBlocking()) {
                 // TODO treat the problem of ThreadLocal corruption with ForkJoinPools
-                workerExecutor.execute(() -> {
-                    ContextImpl.setContext(context);
-                    ((DefaultInboundEvent<T>) inbound).accept(incoming);
-                    ContextImpl.setContext(null);
-                });
+                workerExecutor.execute(code);
             } else {
                 // Processes the message using the assigned event executor
-                eventExecutors.get(incoming.getTarget()).execute(() -> {
-                    ContextImpl.setContext(context);
-                    ((DefaultInboundEvent<T>) inbound).accept(incoming);
-                    ContextImpl.setContext(null);
-                });
+                eventExecutors
+                    .get(incoming.getTarget())
+                    .execute(code);
             }
         }
     }
@@ -142,12 +138,22 @@ public class LocalEventBus implements EventBus {
         decreaseExecutorUsage(eventExecutors.get(event.getName()), event.getCost());
     }
 
+    @SuppressWarnings("unchecked")
     public <T> void enqueue(String queue, T item) {
+        if (!queues.containsKey(queue))
+            throw new IllegalArgumentException("There is not queue named '" + queue
+                + "' registered.");
 
+        if (!((EventQueue) queues.get(queue)).offer(item))
+            throw new QueueItemRefusedException();
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T poll(String queue, Event<?> targetEvent) {
-        return null;
+        if (!queues.containsKey(queue))
+            throw new InvalidQueueException();
+
+        return (T) queues.get(queue).poll();
     }
 
     private ExecutorService nextExecutor(int cost) {

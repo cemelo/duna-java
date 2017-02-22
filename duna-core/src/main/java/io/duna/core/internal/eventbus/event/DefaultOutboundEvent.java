@@ -4,8 +4,9 @@ import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
-import io.duna.core.internal.eventbus.LocalEventBus;
+import io.duna.core.internal.eventbus.MultithreadedEventBus;
 import io.duna.core.internal.eventbus.SimpleMessage;
+
 import org.eclipse.collections.api.multimap.MutableMultimap;
 import org.eclipse.collections.impl.factory.Multimaps;
 
@@ -16,7 +17,7 @@ import java.util.stream.StreamSupport;
 
 public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
-    private final LocalEventBus eventBus;
+    private final MultithreadedEventBus eventBus;
     private final String name;
     private int cost;
 
@@ -28,7 +29,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     private T body;
 
-    public DefaultOutboundEvent(LocalEventBus eventBus, String name) {
+    public DefaultOutboundEvent(MultithreadedEventBus eventBus, String name) {
         this.eventBus = eventBus;
         this.name = name;
         this.headers = Multimaps.mutable.set.empty();
