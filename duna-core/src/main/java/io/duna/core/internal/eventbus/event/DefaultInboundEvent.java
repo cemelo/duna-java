@@ -4,8 +4,7 @@ import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
-import io.duna.core.internal.eventbus.MultithreadedEventBus;
-
+import io.duna.core.internal.eventbus.MultithreadLocalEventBus;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
@@ -16,9 +15,8 @@ import java.util.function.Predicate;
 
 public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
-    private final MultithreadedEventBus eventBus;
+    private final MultithreadLocalEventBus eventBus;
     private final String name;
-    private int cost;
     private boolean blocking;
 
     private Predicate<Message<T>> filter;
@@ -29,7 +27,7 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
 
     private Flowable<T> flowable;
 
-    public DefaultInboundEvent(MultithreadedEventBus eventBus, String name) {
+    public DefaultInboundEvent(MultithreadLocalEventBus eventBus, String name) {
         this.eventBus = eventBus;
         this.eventSink = new AtomicReference<>(m -> {});
         this.name = name;
@@ -38,11 +36,6 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public int getCost() {
-        return cost;
     }
 
     @Override
@@ -58,15 +51,6 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
     @Override
     public boolean isBlocking() {
         return blocking;
-    }
-
-    @Override
-    public InboundEvent<T> setCost(int cost) {
-        if (cost < 0)
-            throw new IllegalArgumentException("The event cost must be a positive integer.");
-
-        this.cost = cost;
-        return this;
     }
 
     @Override
@@ -113,7 +97,6 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
             .subscribe(future::complete);
 
         eventBus.poll(queue, this);
-
         return future;
     }
 
@@ -139,17 +122,21 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
             .refCount();
     }
 
+    @Override
     public void accept(Message<T> message) {
         Objects.requireNonNull(message, () -> "Message cannot be null.");
 
-        interceptor.accept(message);
+        if (interceptor != null)
+            interceptor.accept(message);
 
-        if (filter.test(message)) {
-            if (message.failed() && errorSink != null) {
-                errorSink.accept(message);
-            }
+        if (filter != null && !filter.test(message)) return;
 
-            eventSink.get().accept(message);
+        if (message.failed() && errorSink != null) {
+            System.out.println("Aceitando erro");
+            errorSink.accept(message);
         }
+
+        System.out.println("Aceitando mensagem " + getName());
+        eventSink.get().accept(message);
     }
 }

@@ -11,14 +11,16 @@ public interface EventBus {
 
     <T> OutboundEvent<T> outbound(String name);
 
+    <T> InboundEvent<T> inbound();
+
     <T> InboundEvent<T> inbound(String name);
 
-    <T> Future<Void> dispatch(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer);
+    <T> void queue(String name, EventQueue<T> producer);
 
-    <T> Future<Void> publish(Message<T> outgoing, Consumer<Message<T>> deliveryErrorConsumer);
-
-    <T> void registerQueue(EventQueue<T> producer);
+    <T> void poll(String queueName, InboundEvent<T> target);
 
     <T> void process(Message<T> incoming);
+
+    <T> Future<Void> dispatch(Message<T> outgoing, boolean multicast, Consumer<Message<T>> deliveryErrorConsumer);
 
 }

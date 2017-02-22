@@ -1,12 +1,13 @@
 package io.duna.core.internal.eventbus.event;
 
+import io.duna.core.Context;
 import io.duna.core.concurrent.future.Future;
 import io.duna.core.eventbus.Message;
+import io.duna.core.eventbus.event.Event;
 import io.duna.core.eventbus.event.InboundEvent;
 import io.duna.core.eventbus.event.OutboundEvent;
-import io.duna.core.internal.eventbus.MultithreadedEventBus;
+import io.duna.core.internal.eventbus.MultithreadLocalEventBus;
 import io.duna.core.internal.eventbus.SimpleMessage;
-
 import org.eclipse.collections.api.multimap.MutableMultimap;
 import org.eclipse.collections.impl.factory.Multimaps;
 
@@ -17,9 +18,8 @@ import java.util.stream.StreamSupport;
 
 public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
-    private final MultithreadedEventBus eventBus;
+    private final MultithreadLocalEventBus eventBus;
     private final String name;
-    private int cost;
 
     private MutableMultimap<String, String> headers;
 
@@ -29,20 +29,42 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     private T body;
 
-    public DefaultOutboundEvent(MultithreadedEventBus eventBus, String name) {
+    public DefaultOutboundEvent(MultithreadLocalEventBus eventBus, String name) {
         this.eventBus = eventBus;
         this.name = name;
         this.headers = Multimaps.mutable.set.empty();
     }
 
     @Override
-    public String getName() {
-        return name;
+    public <V> InboundEvent<V> send() {
+        InboundEvent<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
+        responseEvent.addListener(m -> eventBus.cancel(responseEvent));
+
+        eventBus.register(responseEvent);
+
+        emit(responseEvent.getName(), false);
+
+        return responseEvent;
     }
 
     @Override
-    public int getCost() {
-        return cost;
+    public <V> void send(InboundEvent<V> responseEvent) {
+        emit(responseEvent.getName(), false);
+    }
+
+    @Override
+    public Future<Void> emit() {
+        return emit(null, false);
+    }
+
+    @Override
+    public Future<Void> publish() {
+        return emit(null, true);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -57,15 +79,6 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
 
     public T getBody() {
         return this.body;
-    }
-
-    @Override
-    public OutboundEvent<T> setCost(int cost) {
-        if (cost < 0)
-            throw new IllegalArgumentException("The event cost must be a positive integer.");
-
-        this.cost = cost;
-        return this;
     }
 
     @Override
@@ -142,45 +155,17 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
         return this;
     }
 
-    @Override
-    public <V> InboundEvent<V> send() {
-        InboundEvent<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
-        responseEvent
-            .setCost(this.cost)
-            .addListener(m -> eventBus.cancel(responseEvent));
+    @SuppressWarnings("SameParameterValue")
+    private Future<Void> emit(String responseEvent, boolean multicast) {
+        String sourceEventName = null;
 
-        eventBus.register(responseEvent);
+        if (Context.currentContext() != null) {
+            Event<?> currentEvent = Context.currentContext().get("current-event");
+            sourceEventName = currentEvent != null ? currentEvent.getName() : null;
+        }
 
-        emit(responseEvent.getName(), responseEvent.getName());
-
-        return responseEvent;
-    }
-
-    @Override
-    public <V> void send(Consumer<Message<V>> response) {
-        Objects.requireNonNull(response, () -> "The response consumer must be not null.");
-        this.<V> send().addListener(response);
-    }
-
-    @Override
-    public Future<Void> emit() {
-        // TODO the source event should be collected from the Context
-        return emit(UUID.randomUUID().toString(), null);
-    }
-
-    @Override
-    public Future<Void> publish() {
-        return null;
-    }
-
-    @Override
-    public Future<Void> enqueue() {
-        return null;
-    }
-
-    private Future<Void> emit(String sourceEvent, String responseEvent) {
         Message<T> output = SimpleMessage.<T> builder()
-            .source(sourceEvent)
+            .source(sourceEventName)
             .target(this.getName())
             .responseEvent(responseEvent)
             .body(this.body)
@@ -188,6 +173,6 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
             .parent(this.eventBus)
             .build();
 
-        return eventBus.dispatch(output, this.deadLetterSink);
+        return eventBus.dispatch(output, multicast, this.deadLetterSink);
     }
 }

@@ -7,13 +7,9 @@ public interface Event<T> {
 
     String getName();
 
-    int getCost();
-
     Predicate<T> getFilter();
 
     Consumer<T> getInterceptor();
-
-    Event<T> setCost(int cost);
 
     Event<T> setFilter(Predicate<T> predicate);
 

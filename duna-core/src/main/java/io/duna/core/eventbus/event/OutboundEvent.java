@@ -10,8 +10,13 @@ import java.util.function.Predicate;
 
 public interface OutboundEvent<T> extends Event<Message<T>> {
 
-    @Override
-    OutboundEvent<T> setCost(int cost);
+    <V> InboundEvent<V> send();
+
+    <V> void send(InboundEvent<V> responseEvent);
+
+    Future<Void> emit();
+
+    Future<Void> publish();
 
     @Override
     OutboundEvent<T> setFilter(Predicate<Message<T>> predicate);
@@ -30,14 +35,4 @@ public interface OutboundEvent<T> extends Event<Message<T>> {
     OutboundEvent<T> setBody(T body);
 
     OutboundEvent<T> setDeadLetterSink(Consumer<Message<T>> deadLetterConsumer);
-
-    <V> InboundEvent<V> send();
-
-    <V> void send(Consumer<Message<V>> response);
-
-    Future<Void> emit();
-
-    Future<Void> publish();
-
-    Future<Void> enqueue();
 }

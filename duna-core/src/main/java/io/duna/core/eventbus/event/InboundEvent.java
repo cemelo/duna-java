@@ -9,10 +9,13 @@ import java.util.function.Predicate;
 
 public interface InboundEvent<T> extends Event<Message<T>> {
 
-    boolean isBlocking();
+    Future<T> poll(String queue);
 
-    @Override
-    InboundEvent<T> setCost(int cost);
+    Flowable<T> asFlowable();
+
+    void accept(Message<T> message);
+
+    boolean isBlocking();
 
     @Override
     InboundEvent<T> setFilter(Predicate<Message<T>> predicate);
@@ -25,9 +28,4 @@ public interface InboundEvent<T> extends Event<Message<T>> {
     InboundEvent<T> setBlocking(boolean blocking);
 
     InboundEvent<T> addListener(Consumer<Message<T>> consumer);
-
-    Future<T> poll(String queue);
-
-    Flowable<T> asFlowable();
-
 }

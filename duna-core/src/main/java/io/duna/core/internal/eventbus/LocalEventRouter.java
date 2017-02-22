@@ -1,23 +1,22 @@
 package io.duna.core.internal.eventbus;
 
 import io.duna.core.eventbus.EventRouter;
-import io.duna.core.eventbus.event.Event;
+import io.duna.core.eventbus.event.InboundEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LocalEventRouter implements EventRouter {
 
-    private Map<String, Event<?>> events;
+    private Map<String, InboundEvent<?>> events;
 
     LocalEventRouter() {
         this.events = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void register(@NotNull Event<?> event) {
+    public void register(InboundEvent<?> event) {
         if (events.containsKey(event.getName()))
             throw new IllegalArgumentException("Event " + event.getName() + " is already " +
                 "registered.");
@@ -33,9 +32,8 @@ public class LocalEventRouter implements EventRouter {
         events.remove(eventName);
     }
 
-    @Nullable
     @Override
-    public Event<?> get(String eventName) {
+    public InboundEvent<?> get(String eventName) {
         return events.get(eventName);
     }
 
