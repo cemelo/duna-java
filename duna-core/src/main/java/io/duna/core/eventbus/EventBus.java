@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 
 public interface EventBus {
 
+    void setDefaultDeadLetterSink(Consumer<Message<?>> messageHandler);
+
     <T> OutboundEvent<T> outbound(String name);
 
     <T> InboundEvent<T> inbound();

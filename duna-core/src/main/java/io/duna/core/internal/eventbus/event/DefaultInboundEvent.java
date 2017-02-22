@@ -136,7 +136,6 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
             errorSink.accept(message);
         }
 
-        System.out.println("Aceitando mensagem " + getName());
         eventSink.get().accept(message);
     }
 }

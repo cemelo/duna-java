@@ -26,16 +26,6 @@ public final class SimpleMessage<T> implements Message<T> {
     }
 
     @Override
-    public <V> void reply(V response) {
-        // parent.
-    }
-
-    @Override
-    public void fail(Throwable t) {
-
-    }
-
-    @Override
     public String getSource() {
         return source;
     }

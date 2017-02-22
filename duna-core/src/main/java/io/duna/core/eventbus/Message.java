@@ -20,8 +20,4 @@ public interface Message<T> {
 
     boolean failed();
 
-    <V> void reply(V response);
-
-    void fail(Throwable t);
-
 }

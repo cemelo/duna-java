@@ -11,10 +11,10 @@ public class Main {
             Executors.newSingleThreadExecutor());
 
         eventBus.<String>inbound("test")
-            .addListener(System.out::println);
+            .addListener(m -> System.out.println(m.getBody()));
 
         eventBus.<String>inbound("test2")
-            .addListener(System.out::println);
+            .addListener(m -> System.out.println(m.getBody()));
 
         eventBus.queue("random", Math::random);
 

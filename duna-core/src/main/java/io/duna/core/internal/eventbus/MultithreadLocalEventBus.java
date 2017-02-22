@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+
 public class MultithreadLocalEventBus implements EventBus {
 
     private static final Logger log = Logger.getLogger(MultithreadLocalEventBus.class.getName());
@@ -34,6 +35,8 @@ public class MultithreadLocalEventBus implements EventBus {
     private final ExecutorService workerExecutor;
 
     private final NavigableSet<Pair<Integer, ExecutorService>> executorsQueue;
+
+    private Consumer<Message<?>> defaultDeadLetterSink;
 
     public MultithreadLocalEventBus(@NotNull Duna manager,
                                     @NotNull ExecutorService eventExecutors,
@@ -61,6 +64,11 @@ public class MultithreadLocalEventBus implements EventBus {
     }
 
     @Override
+    public void setDefaultDeadLetterSink(Consumer<Message<?>> messageHandler) {
+        this.defaultDeadLetterSink = messageHandler;
+    }
+
+    @Override
     public <T> OutboundEvent<T> outbound(String name) {
         return new DefaultOutboundEvent<>(this, name);
     }
@@ -75,6 +83,7 @@ public class MultithreadLocalEventBus implements EventBus {
         return new DefaultInboundEvent<>(this, name);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> void queue(String name, EventQueue<T> producer) {
         log.fine(() -> name + ": registering queue producer");
@@ -82,17 +91,35 @@ public class MultithreadLocalEventBus implements EventBus {
         this.<T>inbound(name)
             .setBlocking(producer.isBlocking())
             .addListener(m -> {
+                Message<T> message;
+
                 if (producer.isClosed()) {
-                    m.fail(new InvalidQueueException());
+                    message = SimpleMessage.<T>builder()
+                        .source(name)
+                        .target(m.getRespondTo())
+                        .cause(new InvalidQueueException())
+                        .headers(m.getHeaders())
+                        .parent(this)
+                        .build();
+
                     this.cancel(name);
                 } else {
-                    m.reply(producer.poll());
+                    message = SimpleMessage.<T>builder()
+                        .source(name)
+                        .target(m.getRespondTo())
+                        .body(producer.poll())
+                        .headers(m.getHeaders())
+                        .parent(this)
+                        .build();
                 }
+
+                dispatch(message, false, (Consumer) defaultDeadLetterSink);
             });
     }
 
     public <T> void poll(String queue, InboundEvent<T> targetEvent) {
-        this.outbound(queue).emit();
+        this.outbound(queue)
+            .send(targetEvent);
     }
 
     @Override
@@ -123,7 +150,6 @@ public class MultithreadLocalEventBus implements EventBus {
         };
 
         if (event.isBlocking()) {
-            // TODO treat the problem of ThreadLocal corruption with ForkJoinPools
             log.fine(() -> event.getName() + ": Executing event consumer in the worker pool");
             workerExecutor.execute(code);
         } else {
