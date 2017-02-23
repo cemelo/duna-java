@@ -1,19 +1,19 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.eventbus.event.InboundEvent;
+import io.duna.core.eventbus.event.Subscriber;
 import org.jetbrains.annotations.NotNull;
 
 public interface EventRouter {
 
-    void register(InboundEvent<?> event);
+    void register(Subscriber<?> event);
 
     void cancel(@NotNull String eventName);
 
-    default void cancel(InboundEvent<?> event) {
+    default void cancel(Subscriber<?> event) {
         cancel(event.getName());
     }
 
-    InboundEvent<?> get(String eventName);
+    Subscriber<?> get(String eventName);
 
     boolean contains(String eventName);
 

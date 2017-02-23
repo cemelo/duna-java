@@ -1,6 +1,6 @@
 package io.duna.core.service.spi;
 
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 
 public interface ServiceProvider {
 

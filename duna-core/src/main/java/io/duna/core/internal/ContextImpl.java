@@ -1,7 +1,7 @@
 package io.duna.core.internal;
 
 import io.duna.core.Context;
-import io.duna.core.Duna;
+import io.duna.core.Manager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,10 +10,10 @@ public class ContextImpl implements Context {
 
     private static final ThreadLocal<Context> contextHolder = new ThreadLocal<>();
 
-    private Duna manager;
+    private Manager manager;
     private Map<String, Object> data;
 
-    public ContextImpl(Duna manager) {
+    public ContextImpl(Manager manager) {
         this.manager = manager;
         this.data = new ConcurrentHashMap<>();
     }
@@ -27,7 +27,7 @@ public class ContextImpl implements Context {
     }
 
     @Override
-    public Duna manager() {
+    public Manager manager() {
         return this.manager;
     }
 

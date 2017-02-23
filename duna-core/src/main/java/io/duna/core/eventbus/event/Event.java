@@ -3,7 +3,7 @@ package io.duna.core.eventbus.event;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public interface Event<T> {
+public interface Event2<T> {
 
     String getName();
 

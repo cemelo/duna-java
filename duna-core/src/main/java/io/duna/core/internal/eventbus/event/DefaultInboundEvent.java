@@ -1,8 +1,8 @@
 package io.duna.core.internal.eventbus.event;
 
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 import io.duna.core.eventbus.Message;
-import io.duna.core.eventbus.event.InboundEvent;
+import io.duna.core.eventbus.event.Subscriber;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
 import io.duna.core.internal.eventbus.MultithreadLocalEventBus;
 import io.reactivex.BackpressureStrategy;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class DefaultInboundEvent<T> implements InboundEvent<T> {
+public class DefaultInboundEvent<T> implements Subscriber<T> {
 
     private final MultithreadLocalEventBus eventBus;
     private final String name;
@@ -54,31 +54,31 @@ public class DefaultInboundEvent<T> implements InboundEvent<T> {
     }
 
     @Override
-    public InboundEvent<T> setFilter(Predicate<Message<T>> predicate) {
+    public Subscriber<T> setFilter(Predicate<Message<T>> predicate) {
         this.filter = predicate;
         return this;
     }
 
     @Override
-    public InboundEvent<T> setInterceptor(Consumer<Message<T>> interceptor) {
+    public Subscriber<T> setInterceptor(Consumer<Message<T>> interceptor) {
         this.interceptor = interceptor;
         return this;
     }
 
     @Override
-    public InboundEvent<T> setErrorSink(Consumer<Message<T>> errorSink) {
+    public Subscriber<T> setErrorSink(Consumer<Message<T>> errorSink) {
         this.errorSink = errorSink;
         return this;
     }
 
     @Override
-    public InboundEvent<T> setBlocking(boolean blocking) {
+    public Subscriber<T> setBlocking(boolean blocking) {
         this.blocking = blocking;
         return this;
     }
 
     @Override
-    public InboundEvent<T> addListener(Consumer<Message<T>> consumer) {
+    public Subscriber<T> addListener(Consumer<Message<T>> consumer) {
         Objects.requireNonNull(consumer, () -> "The consumer cannot be null.");
         this.eventSink.updateAndGet(c -> c.andThen(consumer));
 

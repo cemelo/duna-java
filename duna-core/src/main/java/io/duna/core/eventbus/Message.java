@@ -2,7 +2,7 @@ package io.duna.core.eventbus;
 
 import org.eclipse.collections.api.multimap.Multimap;
 
-public interface Message<T> {
+public interface Message2<T> {
 
     String getSource();
 

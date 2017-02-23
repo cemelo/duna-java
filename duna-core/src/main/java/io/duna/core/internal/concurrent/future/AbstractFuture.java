@@ -1,6 +1,6 @@
 package io.duna.core.internal.concurrent.future;
 
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 
 import java.util.concurrent.atomic.AtomicReference;
 

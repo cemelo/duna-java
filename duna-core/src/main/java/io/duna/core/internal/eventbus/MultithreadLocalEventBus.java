@@ -1,15 +1,14 @@
 package io.duna.core.internal.eventbus;
 
 import io.duna.core.Context;
-import io.duna.core.Duna;
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 import io.duna.core.eventbus.EventBus;
 import io.duna.core.eventbus.EventRouter;
 import io.duna.core.eventbus.Message;
-import io.duna.core.eventbus.event.InboundEvent;
-import io.duna.core.eventbus.event.OutboundEvent;
-import io.duna.core.eventbus.queue.EventQueue;
+import io.duna.core.eventbus.event.Emitter;
+import io.duna.core.eventbus.event.Subscriber;
 import io.duna.core.eventbus.queue.InvalidQueueException;
+import io.duna.core.eventbus.queue.MessageQueue;
 import io.duna.core.internal.ContextImpl;
 import io.duna.core.internal.eventbus.event.DefaultInboundEvent;
 import io.duna.core.internal.eventbus.event.DefaultOutboundEvent;
@@ -69,23 +68,23 @@ public class MultithreadLocalEventBus implements EventBus {
     }
 
     @Override
-    public <T> OutboundEvent<T> outbound(String name) {
+    public <T> Emitter<T> outbound(String name) {
         return new DefaultOutboundEvent<>(this, name);
     }
 
     @Override
-    public <T> InboundEvent<T> inbound() {
+    public <T> Subscriber<T> inbound() {
         return new DefaultInboundEvent<>(this, UUID.randomUUID().toString());
     }
 
     @Override
-    public <T> InboundEvent<T> inbound(String name) {
+    public <T> Subscriber<T> inbound(String name) {
         return new DefaultInboundEvent<>(this, name);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> void queue(String name, EventQueue<T> producer) {
+    public <T> void queue(String name, MessageQueue<T> producer) {
         log.fine(() -> name + ": registering queue producer");
 
         this.<T>inbound(name)
@@ -117,7 +116,7 @@ public class MultithreadLocalEventBus implements EventBus {
             });
     }
 
-    public <T> void poll(String queue, InboundEvent<T> targetEvent) {
+    public <T> void poll(String queue, Subscriber<T> targetEvent) {
         this.outbound(queue)
             .send(targetEvent);
     }
@@ -138,14 +137,14 @@ public class MultithreadLocalEventBus implements EventBus {
             return;
         }
 
-        InboundEvent<?> event = router.get(incoming.getTarget());
+        Subscriber<?> event = router.get(incoming.getTarget());
 
         Context context = new ContextImpl(manager);
         context.put("current-event", event);
 
         Runnable code = () -> {
             ContextImpl.setContext(context);
-            ((InboundEvent) event).accept(incoming);
+            ((Subscriber) event).accept(incoming);
             ContextImpl.setContext(null);
         };
 
@@ -160,7 +159,7 @@ public class MultithreadLocalEventBus implements EventBus {
         }
     }
 
-    public boolean register(InboundEvent<?> event) {
+    public boolean register(Subscriber<?> event) {
         if (router.contains(event.getName()))
             return false;
 
@@ -177,7 +176,7 @@ public class MultithreadLocalEventBus implements EventBus {
         eventExecutors.remove(event);
     }
 
-    public void cancel(InboundEvent<?> event) {
+    public void cancel(Subscriber<?> event) {
         cancel(event.getName());
     }
 

@@ -1,25 +1,25 @@
 package io.duna.core.eventbus;
 
-import io.duna.core.concurrent.future.Future;
-import io.duna.core.eventbus.event.InboundEvent;
-import io.duna.core.eventbus.event.OutboundEvent;
-import io.duna.core.eventbus.queue.EventQueue;
+import io.duna.core.concurrent.Future;
+import io.duna.core.eventbus.event.Emitter;
+import io.duna.core.eventbus.event.Subscriber;
+import io.duna.core.eventbus.queue.MessageQueue;
 
 import java.util.function.Consumer;
 
-public interface EventBus {
+public interface EventBus2 {
 
     void setDefaultDeadLetterSink(Consumer<Message<?>> messageHandler);
 
-    <T> OutboundEvent<T> outbound(String name);
+    <T> Emitter<T> outbound(String name);
 
-    <T> InboundEvent<T> inbound();
+    <T> Subscriber<T> inbound();
 
-    <T> InboundEvent<T> inbound(String name);
+    <T> Subscriber<T> inbound(String name);
 
-    <T> void queue(String name, EventQueue<T> producer);
+    <T> MessageQueue<T> queue(String name);
 
-    <T> void poll(String queueName, InboundEvent<T> target);
+    <T> void poll(String queueName, Subscriber<T> target);
 
     <T> void process(Message<T> incoming);
 

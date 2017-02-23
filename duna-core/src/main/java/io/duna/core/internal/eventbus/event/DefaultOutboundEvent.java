@@ -1,11 +1,11 @@
 package io.duna.core.internal.eventbus.event;
 
 import io.duna.core.Context;
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 import io.duna.core.eventbus.Message;
+import io.duna.core.eventbus.event.Emitter;
 import io.duna.core.eventbus.event.Event;
-import io.duna.core.eventbus.event.InboundEvent;
-import io.duna.core.eventbus.event.OutboundEvent;
+import io.duna.core.eventbus.event.Subscriber;
 import io.duna.core.internal.eventbus.MultithreadLocalEventBus;
 import io.duna.core.internal.eventbus.SimpleMessage;
 import org.eclipse.collections.api.multimap.MutableMultimap;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
-public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
+public class DefaultOutboundEvent<T> implements Emitter<T> {
 
     private final MultithreadLocalEventBus eventBus;
     private final String name;
@@ -36,8 +36,8 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public <V> InboundEvent<V> send() {
-        InboundEvent<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
+    public <V> Subscriber<V> send() {
+        Subscriber<V> responseEvent = eventBus.inbound(UUID.randomUUID().toString());
         responseEvent.addListener(m -> eventBus.cancel(responseEvent));
 
         eventBus.register(responseEvent);
@@ -48,7 +48,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public <V> void send(InboundEvent<V> responseEvent) {
+    public <V> void send(Subscriber<V> responseEvent) {
         emit(responseEvent.getName(), false);
     }
 
@@ -82,19 +82,19 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> setFilter(Predicate<Message<T>> predicate) {
+    public Emitter<T> setFilter(Predicate<Message<T>> predicate) {
         this.filter = predicate;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> setInterceptor(Consumer<Message<T>> interceptor) {
+    public Emitter<T> setInterceptor(Consumer<Message<T>> interceptor) {
         this.interceptor = interceptor;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> setHeader(String key, String value) {
+    public Emitter<T> setHeader(String key, String value) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(value, () -> "Header value must be not null.");
 
@@ -103,7 +103,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> setHeader(String key, String... values) {
+    public Emitter<T> setHeader(String key, String... values) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(values, () -> "Header values must be not null.");
 
@@ -115,7 +115,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> setHeader(String key, Iterator<String> values) {
+    public Emitter<T> setHeader(String key, Iterator<String> values) {
         Objects.requireNonNull(key, () -> "Header key must be not null.");
         Objects.requireNonNull(values, () -> "Header values must be not null.");
 
@@ -129,7 +129,7 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> setHeader(Map<String, String> headers) {
+    public Emitter<T> setHeader(Map<String, String> headers) {
         Objects.requireNonNull(headers, () -> "Headers map must be not null.");
 
         headers.entrySet()
@@ -142,13 +142,13 @@ public class DefaultOutboundEvent<T> implements OutboundEvent<T> {
     }
 
     @Override
-    public OutboundEvent<T> setBody(T body) {
+    public Emitter<T> setBody(T body) {
         this.body = body;
         return this;
     }
 
     @Override
-    public OutboundEvent<T> setDeadLetterSink(Consumer<Message<T>> deadLetterConsumer) {
+    public Emitter<T> setDeadLetterSink(Consumer<Message<T>> deadLetterConsumer) {
         Objects.requireNonNull(deadLetterConsumer,
             () -> "The dead letter consumer must be not null.");
         this.deadLetterSink = deadLetterConsumer;

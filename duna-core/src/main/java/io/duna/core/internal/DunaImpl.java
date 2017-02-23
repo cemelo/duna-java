@@ -1,7 +1,6 @@
 package io.duna.core.internal;
 
-import io.duna.core.Duna;
-import io.duna.core.concurrent.future.Future;
+import io.duna.core.concurrent.Future;
 
 public class DunaImpl implements Duna {
 
