@@ -10,6 +10,8 @@ import java.util.function.Predicate
 /**
  * Represents an event emitter.
  *
+ * @param T the type of attachment the event messages must carry.de
+ *
  * @author [Carlos Eduardo Melo][mail@cemelo.com]
  * @see [EventBus]
  */

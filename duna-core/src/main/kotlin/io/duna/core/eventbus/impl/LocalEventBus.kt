@@ -4,6 +4,8 @@ import io.duna.core.eventbus.EventBus
 import io.duna.core.eventbus.Message
 import io.duna.core.eventbus.event.Emitter
 import io.duna.core.eventbus.event.Subscriber
+import io.duna.core.eventbus.event.impl.EmitterImpl
+import io.duna.core.eventbus.event.impl.SubscriberImpl
 import io.duna.core.eventbus.queue.MessageQueue
 import io.duna.core.eventbus.routing.Router
 import java.util.function.Consumer
@@ -13,13 +15,9 @@ internal class LocalEventBus : EventBus {
 
   private val pipeline = PipelineImpl()
 
-  override fun <T> emitter(event: String): Emitter<T> {
-    TODO("not implemented")
-  }
+  override fun <T> emitter(event: String): Emitter<T> = EmitterImpl<T>(event)
 
-  override fun <T> subscriber(event: String): Subscriber<T> {
-    TODO("not implemented")
-  }
+  override fun <T> subscriber(event: String): Subscriber<T> = SubscriberImpl<T>(event)
 
   override fun <T> queue(name: String): MessageQueue<T> {
     TODO("not implemented")
@@ -36,6 +34,10 @@ internal class LocalEventBus : EventBus {
   }
 
   override fun intercept(interceptor: Consumer<Message<*>>): EventBus {
+    TODO("not implemented")
+  }
+
+  override fun accept(message: Message<*>) {
     TODO("not implemented")
   }
 }
