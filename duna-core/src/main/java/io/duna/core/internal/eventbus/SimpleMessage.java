@@ -2,6 +2,7 @@ package io.duna.core.internal.eventbus;
 
 import io.duna.core.eventbus.EventBus;
 import io.duna.core.eventbus.Message;
+
 import org.eclipse.collections.api.multimap.Multimap;
 
 public final class SimpleMessage<T> implements Message<T> {
@@ -46,7 +47,7 @@ public final class SimpleMessage<T> implements Message<T> {
     }
 
     @Override
-    public T getBody() {
+    public T getAttachment() {
         return body;
     }
 

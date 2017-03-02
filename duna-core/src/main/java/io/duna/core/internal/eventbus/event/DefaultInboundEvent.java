@@ -5,6 +5,7 @@ import io.duna.core.eventbus.Message;
 import io.duna.core.eventbus.event.Subscriber;
 import io.duna.core.internal.concurrent.future.SimpleFuture;
 import io.duna.core.internal.eventbus.MultithreadLocalEventBus;
+
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
@@ -113,7 +114,7 @@ public class DefaultInboundEvent<T> implements Subscriber<T> {
                         if (emitter.isCancelled()) return;
 
                         if (m.failed()) emitter.onError(m.getCause());
-                        if (m.succeeded()) emitter.onNext(m.getBody());
+                        if (m.succeeded()) emitter.onNext(m.getAttachment());
                     }));
 
                 emitter.setCancellable(() -> eventBus.cancel(this));
