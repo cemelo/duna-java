@@ -66,5 +66,6 @@ interface EventBus {
   fun intercept(interceptor: Consumer<Message<*>>): EventBus
 
   fun accept(message: Message<*>)
+
 }
 

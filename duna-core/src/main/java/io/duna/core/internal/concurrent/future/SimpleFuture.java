@@ -1,8 +1,11 @@
 package io.duna.core.internal.concurrent.future;
 
 import io.duna.core.concurrent.Future;
+import kotlin.Unit;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SimpleFuture<T> extends AbstractFuture<T> {
@@ -23,7 +26,7 @@ public class SimpleFuture<T> extends AbstractFuture<T> {
     @Override
     public void cancel() {
         super.cancel();
-
+        java.util.concurrent.Future
         if (cancellationConsumer != null && consumerInvoked.compareAndSet(false, true)) {
             cancellationConsumer.accept(null);
         }
@@ -49,8 +52,9 @@ public class SimpleFuture<T> extends AbstractFuture<T> {
         }
     }
 
+    @NotNull
     @Override
-    public Future<T> onComplete(Consumer<T> consumer) {
+    public Future<T> onComplete(@NotNull Consumer<? super T> consumer) {
         this.completionConsumer = consumer;
 
         if (completed() && consumerInvoked.compareAndSet(false, true)) {
@@ -60,8 +64,9 @@ public class SimpleFuture<T> extends AbstractFuture<T> {
         return this;
     }
 
+    @NotNull
     @Override
-    public Future<T> onError(Consumer<Throwable> errorConsumer) {
+    public Future<T> onError(@NotNull BiConsumer<? super T, ? super Throwable> errorConsumer) {
         this.errorConsumer = errorConsumer;
 
         if (failed() && consumerInvoked.compareAndSet(false, true)) {
@@ -71,8 +76,9 @@ public class SimpleFuture<T> extends AbstractFuture<T> {
         return this;
     }
 
+    @NotNull
     @Override
-    public Future<T> onCancel(Consumer<Void> cancellationConsumer) {
+    public Future<T> onCancel(@NotNull Consumer<Unit> cancellationConsumer) {
         this.cancellationConsumer = cancellationConsumer;
 
         if (cancelled() && consumerInvoked.compareAndSet(false, true)) {

@@ -15,9 +15,9 @@ internal class LocalEventBus : EventBus {
 
   private val pipeline = PipelineImpl()
 
-  override fun <T> emitter(event: String): Emitter<T> = EmitterImpl<T>(event)
+  override fun <T> emitter(event: String): Emitter<T> = EmitterImpl(this, event)
 
-  override fun <T> subscriber(event: String): Subscriber<T> = SubscriberImpl<T>(event)
+  override fun <T> subscriber(event: String): Subscriber<T> = SubscriberImpl(this, event)
 
   override fun <T> queue(name: String): MessageQueue<T> {
     TODO("not implemented")
@@ -40,4 +40,5 @@ internal class LocalEventBus : EventBus {
   override fun accept(message: Message<*>) {
     TODO("not implemented")
   }
+
 }

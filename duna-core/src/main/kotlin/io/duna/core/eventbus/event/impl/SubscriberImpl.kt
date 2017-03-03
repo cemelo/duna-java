@@ -1,26 +1,23 @@
 package io.duna.core.eventbus.event.impl
 
+import io.duna.core.eventbus.EventBus
 import io.duna.core.eventbus.Message
 import io.duna.core.eventbus.event.Subscriber
 import io.reactivex.Flowable
 import java.util.function.Consumer
 import java.util.function.Predicate
 
-internal class SubscriberImpl<T>(private val event: String) : Subscriber<T> {
+internal open class SubscriberImpl<T>(private val eventBus: EventBus,
+                                      override val name: String) : Subscriber<T> {
+  private var blocking = false
 
-  override fun register() {
-    TODO("not implemented")
-  }
+  private var consumer: Consumer<in Message<T>>? = null
 
-  override fun purge() {
-    TODO("not implemented")
-  }
+  private var errorSink: Consumer<in Message<Throwable>>? = null
+  private var filter: Predicate<in Message<T>>? = null
 
+  private var interceptor: Consumer<in Message<T>>? = null
   override fun consume(consumer: Consumer<in Message<T>>) {
-    TODO("not implemented")
-  }
-
-  override fun getName(): String {
     TODO("not implemented")
   }
 
@@ -29,18 +26,26 @@ internal class SubscriberImpl<T>(private val event: String) : Subscriber<T> {
   }
 
   override fun blocking(): Subscriber<T> {
+    this.blocking = true
+    return this
+  }
+
+  override fun accept(message: Message<*>) {
     TODO("not implemented")
   }
 
   override fun withErrorSink(errorSink: Consumer<in Message<Throwable>>): Subscriber<T> {
-    TODO("not implemented")
+    this.errorSink = errorSink
+    return this
   }
 
   override fun filter(predicate: Predicate<in Message<T>>): Subscriber<T> {
-    TODO("not implemented")
+    this.filter = predicate
+    return this
   }
 
-  override fun intercept(consumer: Consumer<in Message<T>>): Subscriber<T> {
-    TODO("not implemented")
+  override fun intercept(interceptor: Consumer<in Message<T>>): Subscriber<T> {
+    this.interceptor = interceptor
+    return this
   }
 }

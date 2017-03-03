@@ -1,5 +1,6 @@
 package io.duna.core.eventbus.routing
 
+import io.duna.core.concurrent.Future
 import io.duna.core.eventbus.Message
 import io.duna.core.eventbus.routing.clauses.RouteDefinition
 
@@ -17,6 +18,8 @@ interface Router {
    */
   fun from(source: String, init: RouteDefinition.() -> Unit): RouteDefinition
 
+  fun from(source: String, route: RouteDefinition): RouteDefinition
+
   /**
    * Creates a new routing rule based on the target of the message.
    *
@@ -26,12 +29,14 @@ interface Router {
    */
   fun to(target: String, init: RouteDefinition.() -> Unit): RouteDefinition
 
+  fun to(target: String, route: RouteDefinition): RouteDefinition
+
   /**
    * Dispatches a message to subscribers in this node according to the
    * route definitions.
    *
    * @param message the message to be delivered.
    */
-  fun route(message: Message<*>)
+  fun route(message: Message<*>): Future<Message<*>>
 
 }

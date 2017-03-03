@@ -1,5 +1,5 @@
 package io.duna.core.eventbus
 
-import org.eclipse.collections.api.multimap.Multimap
+import org.eclipse.collections.api.multimap.MutableMultimap
 
-typealias Headers = Multimap<String, String>
+typealias Headers = MutableMultimap<String, String>

@@ -2,8 +2,8 @@ package io.duna.core.internal.eventbus;
 
 import io.duna.core.eventbus.EventBus;
 import io.duna.core.eventbus.Message;
-
 import org.eclipse.collections.api.multimap.Multimap;
+import org.jetbrains.annotations.Nullable;
 
 public final class SimpleMessage<T> implements Message<T> {
 
@@ -26,6 +26,7 @@ public final class SimpleMessage<T> implements Message<T> {
         this.cause = cause;
     }
 
+    @Nullable
     @Override
     public String getSource() {
         return source;
@@ -46,6 +47,7 @@ public final class SimpleMessage<T> implements Message<T> {
         return headers;
     }
 
+    @Nullable
     @Override
     public T getAttachment() {
         return body;
