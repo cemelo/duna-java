@@ -13,15 +13,22 @@ package io.duna.core.eventbus
  */
 interface Message<out T> {
 
-  fun getSource(): String?
+  val source: String?
 
-  fun getTarget(): String
+  val target: String
 
-  fun getResponseEvent(): String?
+  val responseEvent: String?
 
-  fun getHeaders(): Headers
+  val headers: Headers
 
-  fun getAttachment(): T?
+  val attachment: T?
 
-  fun header(key: String): Set<String> = getHeaders()[key].toHashSet()
+  val cause: Throwable?
+
+  fun header(key: String): Set<String> = headers[key].toHashSet()
+
+  fun succeeded() = cause == null
+
+  fun failed() = !succeeded()
+
 }

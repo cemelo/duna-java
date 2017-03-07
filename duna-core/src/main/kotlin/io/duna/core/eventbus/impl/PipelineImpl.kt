@@ -8,27 +8,26 @@ import java.util.function.Function
 
 internal class PipelineImpl : Pipeline {
 
-  private val transforms: Deque<Function<*, *>> = ConcurrentLinkedDeque()
+  private val transforms: Deque<Function<Message<*>, Message<*>>> = ConcurrentLinkedDeque()
 
-  override fun <V, R> addFirst(pipe: Function<Message<V>, Message<R>>): Pipeline {
+  override fun addFirst(pipe: Function<Message<*>, Message<*>>): Pipeline {
     transforms.addFirst(pipe)
     return this
   }
 
-  override fun <V, R> addLast(pipe: Function<Message<V>, Message<R>>): Pipeline {
-    transforms.addLast(pipe as Function<*, *>)
+  override fun addLast(pipe: Function<Message<*>, Message<*>>): Pipeline {
+    transforms.addLast(pipe)
     return this
   }
 
-  @Suppress("UNCHECKED_CAST")
-  override fun <V, R> transform(input: Message<V>): Message<R> {
-    var result: Message<*> = input
+  override fun transform(input: Message<*>): Message<*> {
+    var result = input
 
     transforms.forEach {
-      result = (it as Function<Message<*>, Message<*>>).apply(result)
+      result = it.apply(result)
     }
 
-    return result as Message<R>
+    return result
   }
 
   override fun isEmpty(): Boolean = transforms.isEmpty()

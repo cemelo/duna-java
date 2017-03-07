@@ -110,8 +110,8 @@ interface Future<T> {
      *
      * @return a completed future.
      */
-    fun completedFuture(): Future<Unit> {
-      val future = FutureImpl<Unit>()
+    fun <T> completedFuture(): Future<T> {
+      val future = FutureImpl<T>()
       future.complete()
 
       return future

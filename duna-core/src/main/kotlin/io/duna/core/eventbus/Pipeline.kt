@@ -4,11 +4,11 @@ import java.util.function.Function
 
 interface Pipeline {
 
-  fun <V, R> addFirst(pipe: Function<Message<V>, Message<R>>): Pipeline
+  fun addFirst(pipe: Function<Message<*>, Message<*>>): Pipeline
 
-  fun <V, R> addLast(pipe: Function<Message<V>, Message<R>>): Pipeline
+  fun addLast(pipe: Function<Message<*>, Message<*>>): Pipeline
 
-  fun <V, R> transform(input: Message<V>): Message<R>
+  fun transform(input: Message<*>): Message<*>
 
   fun isEmpty(): Boolean
 

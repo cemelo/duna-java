@@ -10,33 +10,25 @@ import io.duna.core.eventbus.routing.clauses.RouteDefinition
 interface Router {
 
   /**
-   * Creates a new routing rule based on the source of the message.
+   * Creates a new routing rule.
    *
-   * @param source the event that triggered the message.
-   * @param init   a function with routing rules.
-   * @return the new route definition.
+   * @param route a function with routing rules.
+   * @return the new dispatch definition.
    */
-  fun from(source: String, init: RouteDefinition.() -> Unit): RouteDefinition
-
-  fun from(source: String, route: RouteDefinition): RouteDefinition
+  fun create(name: String, route: RouteDefinition.(Message<*>) -> Unit)
 
   /**
-   * Creates a new routing rule based on the target of the message.
    *
-   * @param target the message target event.
-   * @param init   a function with routing rules.
-   * @return the new route definition.
    */
-  fun to(target: String, init: RouteDefinition.() -> Unit): RouteDefinition
-
-  fun to(target: String, route: RouteDefinition): RouteDefinition
+  fun remove(name: String)
 
   /**
    * Dispatches a message to subscribers in this node according to the
-   * route definitions.
+   * dispatch definitions.
    *
    * @param message the message to be delivered.
    */
-  fun route(message: Message<*>): Future<Message<*>>
+  fun dispatch(message: Message<*>): Future<Message<*>>
 
+  fun route(message: Message<*>): Set<String>
 }

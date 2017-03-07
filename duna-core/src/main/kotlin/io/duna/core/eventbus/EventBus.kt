@@ -1,5 +1,6 @@
 package io.duna.core.eventbus
 
+import io.duna.core.concurrent.Future
 import io.duna.core.eventbus.event.Emitter
 import io.duna.core.eventbus.event.Subscriber
 import io.duna.core.eventbus.queue.MessageQueue
@@ -67,5 +68,12 @@ interface EventBus {
 
   fun accept(message: Message<*>)
 
+  fun dispatch(message: Message<*>): Future<Message<*>>
+
+  fun purge(subscriber: Subscriber<*>): Boolean
+
+  val filter: Predicate<Message<*>>?
+
+  val interceptor: Consumer<Message<*>>?
 }
 

@@ -9,12 +9,14 @@ import java.util.function.Predicate
 /**
  * Represents an event subscriber.
  *
+ * _Thread-safety:_ unless otherwise explicitly noted, implementations should not be considered thread-safe.
+ *
  * @param T the type of attachments the event messages carry.
  *
  * @author [Carlos Eduardo Melo][hk@cemelo.com]
  * @see [EventBus]
  */
-interface Subscriber<T> : Event<T> {
+interface Subscriber<T> : EventProcessor<T> {
 
   /**
    * Creates a consumer to receive messages from the event bus.
@@ -24,7 +26,7 @@ interface Subscriber<T> : Event<T> {
    *
    * @param consumer the sink function.
    */
-  fun consume(consumer: Consumer<in Message<T>>): Unit
+  fun onNext(consumer: Consumer<in Message<T>>): Subscriber<T>
 
   /**
    * Creates a consumer to receive messages from the event bus.
@@ -34,7 +36,29 @@ interface Subscriber<T> : Event<T> {
    *
    * @param consumer the sink function.
    */
-  fun consume(consumer: (Message<T>) -> Unit) = consume(Consumer(consumer::invoke))
+  fun onNext(consumer: (Message<T>) -> Unit) = onNext(Consumer(consumer::invoke))
+
+  /**
+   * Configures a sink to onNext error messages.
+   *
+   * When the sink is defined, error messages won't be forwarded to the consumer sink registered
+   * at the [Subscriber.onNext] function.
+   *
+   * @param errorSink the sink function.
+   * @return this event subscriber
+   */
+  fun onError(errorSink: Consumer<in Message<T>>): Subscriber<T>
+
+  /**
+   * Configures a sink to onNext error messages.
+   *
+   * When the sink is defined, error messages won't be forwarded to the consumer sink registered
+   * at the [Subscriber.onNext] function.
+   *
+   * @param errorSink the sink function.
+   * @return this event subscriber
+   */
+  fun onError(errorSink: (Message<T>) -> Unit) = onError(Consumer(errorSink::invoke))
 
   /**
    * Creates a [Flowable] used to observe the event to which this instance is subscribed.
@@ -42,10 +66,27 @@ interface Subscriber<T> : Event<T> {
    * This is a terminal operation. This means that, after this operation is called, the subscriber
    * will be registered with the [EventBus] and no changes can be made to its configuration.
    *
-   * @return a hot [Flowable] that observes the subscribed event.
+   * @return a [Flowable] that observes the subscribed event.
    * @see [Flowable]
    */
   fun toFlowable(): Flowable<T>
+
+  /**
+   * Registers a default route to this subscriber in the [EventBus]'s [Router].
+   *
+   * @return this subscriber.
+   */
+  fun register(): Subscriber<T>
+
+  /**
+   * Removes this subscriber from the [EventBus].
+   */
+  fun unregister()
+
+  /**
+   * FIXME document
+   */
+  fun accept(message: Message<*>)
 
   /**
    * Marks this subscriber for execution in a worker pool.
@@ -59,37 +100,16 @@ interface Subscriber<T> : Event<T> {
   fun blocking(): Subscriber<T>
 
   /**
-   * Configures a sink to consume error messages.
-   *
-   * When the sink is defined, error messages won't be forwarded to the consumer sink registered
-   * at the [Subscriber.consume] function.
-   *
-   * @param errorSink the sink function.
-   * @return this event subscriber
+   * Whether this event consumers must run in the worker pool.
    */
-  fun withErrorSink(errorSink: Consumer<in Message<Throwable>>): Subscriber<T>
-
-  /**
-   * Configures a sink to consume error messages.
-   *
-   * When the sink is defined, error messages won't be forwarded to the consumer sink registered
-   * at the [Subscriber.consume] function.
-   *
-   * @param errorSink the sink function.
-   * @return this event subscriber
-   */
-  fun withErrorSink(errorSink: (Message<Throwable>) -> Unit) = withErrorSink(Consumer(errorSink::invoke))
-
-  /**
-   * FIXME document
-   */
-  fun accept(message: Message<*>)
+  val blocking: Boolean
+    get
 
   override fun filter(predicate: Predicate<in Message<T>>): Subscriber<T>
 
   override fun filter(predicate: (Message<T>) -> Boolean) = super.filter(predicate) as Subscriber<T>
 
-  override fun intercept(interceptor: Consumer<in Message<T>>): Subscriber<T>
+  override fun intercept(interceptor: Consumer<in Message<T>>): EventProcessor<T>
 
   override fun intercept(interceptor: (Message<T>) -> Unit) = super.intercept(interceptor) as Subscriber<T>
 }
