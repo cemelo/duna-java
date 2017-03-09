@@ -15,7 +15,7 @@ interface Router {
    * @param route a function with routing rules.
    * @return the new dispatch definition.
    */
-  fun create(name: String, route: RouteDefinition.(Message<*>) -> Unit)
+  fun create(name: String, route: RouteDefinition.() -> Unit)
 
   /**
    *

@@ -1,12 +1,10 @@
 package io.duna.core.eventbus
 
 import io.duna.core.concurrent.Future
-import io.duna.core.eventbus.event.Emitter
+import io.duna.core.eventbus.event.Event
 import io.duna.core.eventbus.event.Subscriber
 import io.duna.core.eventbus.queue.MessageQueue
 import io.duna.core.eventbus.routing.Router
-import java.util.function.Consumer
-import java.util.function.Predicate
 
 /**
  * The event bus.
@@ -19,17 +17,17 @@ import java.util.function.Predicate
 interface EventBus {
 
   /**
-   * Creates an event emitter.
+   * Prepares an event to be emitted.
    *
-   * @param event the name of the event to be emitted.
-   * @return the event emitter.
+   * @param name the event of the event to be emitted.
+   * @return a fluent API responsible for emitting an event.
    */
-  fun <T> emitter(event: String): Emitter<T>
+  fun <T> emit(name: String): Event<T>
 
   /**
    * Creates an event subscriber.
    *
-   * @param event the name of the event to be consumed.
+   * @param event the event of the event to be consumed.
    * @return the event subscriber.
    */
   fun <T> subscriber(event: String): Subscriber<T>
@@ -40,40 +38,20 @@ interface EventBus {
    * This queue provides items to be polled by other members
    * of the event bus.
    *
-   * @param name the queue name
+   * @param name the queue event
    * @return the message queue.
    */
   fun <T> queue(name: String): MessageQueue<T>
-
-  /**
-   * Returns the event bus pipeline.
-   */
-  fun pipeline(): Pipeline
 
   /**
    * Returns the event bus router.
    */
   fun router(): Router
 
-  /**
-   * Creates a global filter for messages received by the event bus. Any
-   * messages not matching the predicate provided will be discarded.
-   */
-  fun filter(filter: Predicate<Message<*>>): EventBus
-
-  /**
-   * Creates a global interceptor of messages received by the event bus.
-   */
-  fun intercept(interceptor: Consumer<Message<*>>): EventBus
-
   fun accept(message: Message<*>)
 
   fun dispatch(message: Message<*>): Future<Message<*>>
 
   fun purge(subscriber: Subscriber<*>): Boolean
-
-  val filter: Predicate<Message<*>>?
-
-  val interceptor: Consumer<Message<*>>?
 }
 

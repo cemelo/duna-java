@@ -4,5 +4,5 @@ import io.duna.core.eventbus.Message
 import io.duna.core.eventbus.event.Subscriber
 
 fun staticRoute(subscriber: Subscriber<*>): RouteDefinition.(Message<*>) -> Unit {
-  return { deliverTo(subscriber.name) }
+  return { deliverTo(subscriber.event) }
 }

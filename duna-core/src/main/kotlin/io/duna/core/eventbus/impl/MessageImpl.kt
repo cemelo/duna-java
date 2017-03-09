@@ -9,6 +9,5 @@ internal data class MessageImpl<out T>(override val source: String? = null,
                                        override val responseEvent: String? = null,
                                        override val headers: Headers = Multimaps.mutable.list.empty(),
                                        override val attachment: T? = null,
-                                       override val cause: Throwable? = null,
-                                       internal val messageType: MessageType = MessageType.UNICAST)
+                                       override val cause: Throwable? = null)
   : Message<T>

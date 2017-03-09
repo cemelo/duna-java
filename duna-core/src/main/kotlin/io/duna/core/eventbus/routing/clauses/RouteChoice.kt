@@ -11,7 +11,7 @@ class RouteChoice {
   }
 
   fun to(target: Subscriber<*>): Unit {
-    this.target = target.name
+    this.target = target.event
   }
 
 }
