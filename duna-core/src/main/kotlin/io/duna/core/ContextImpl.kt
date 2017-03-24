@@ -1,6 +1,10 @@
 package io.duna.core
 
-internal class ContextImpl : Context, AbstractMap<String, Any>() {
+import java.util.concurrent.ExecutorService
+
+internal class ContextImpl(private val executorService: ExecutorService,
+                           private val workerPool: ExecutorService)
+  : Context, AbstractMap<String, Any>() {
 
   private val internalMap = HashMap<String, Any>()
 
@@ -13,8 +17,15 @@ internal class ContextImpl : Context, AbstractMap<String, Any>() {
   override val values: MutableCollection<Any>
     get() = internalMap.values
 
-  override fun manager(): Manager {
-    TODO("not implemented")
+  override fun execute(block: () -> Unit) {
+    if (Context.inDunaThread)
+      block.invoke()
+    else
+      executorService.submit(block)
+  }
+
+  override fun executeBlocking(block: () -> Unit) {
+    workerPool.submit(block)
   }
 
   override fun containsKey(key: String): Boolean {

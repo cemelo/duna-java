@@ -1,0 +1,9 @@
+# Duna Thread Model
+
+The thread model should follow these rules:
+
+    * an outbound event can be emitted by any thread, but incoming events should be processed
+      by the same thread;
+    * all consumers and flowable emitters registered under a subscriber must run sequentially,
+      never in parallel;
+    * the event bus can be called from any thread.

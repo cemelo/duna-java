@@ -1,5 +1,8 @@
 package io.duna.core
 
+import io.duna.core.bus.event.Subscriber
+import io.duna.core.concurrent.execution.DunaThread
+
 /**
  * Represents the execution context of an event.
  *
@@ -8,10 +11,9 @@ package io.duna.core
  */
 interface Context : MutableMap<String, Any> {
 
-  /**
-   * @return this context manager.
-   */
-  fun manager(): Manager
+  fun execute(block: () -> Unit)
+
+  fun executeBlocking(block: () -> Unit)
 
   /**
    * Used to hold the [Context] instance associated to the current thread.
@@ -19,6 +21,9 @@ interface Context : MutableMap<String, Any> {
   companion object {
 
     private var context: ThreadLocal<Context?> = ThreadLocal()
+
+    val inDunaThread: Boolean
+      get() = Thread.currentThread() is DunaThread
 
     /**
      * @return the context associated to the current thread.

@@ -1,7 +1,7 @@
 package io.duna.core
 
 import io.duna.core.concurrent.Future
-import io.duna.core.eventbus.EventBus
+import io.duna.core.bus.EventBus
 
 interface Manager {
 
