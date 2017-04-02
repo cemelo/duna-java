@@ -1,10 +1,10 @@
 package io.duna.core.bus.event
 
-import io.duna.core.bus.EventBus
+import io.duna.core.bus.OldEventBus
 import io.duna.core.bus.Message
 import java.util.function.Consumer
 
-abstract class AbstractSubscriber<T>(protected val eventBus: EventBus,
+abstract class AbstractSubscriber<T>(protected val eventBus: OldEventBus,
                                      override val event: String) : Subscriber<T> {
 
   override var isBlocking: Boolean = false

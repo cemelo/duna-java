@@ -1,7 +1,7 @@
 package io.duna.core.bus.event
 
 import io.duna.core.Context
-import io.duna.core.bus.EventBus
+import io.duna.core.bus.OldEventBus
 import io.duna.core.bus.Headers
 import io.duna.core.bus.Message
 import io.duna.core.bus.impl.MessageImpl
@@ -10,7 +10,7 @@ import org.eclipse.collections.impl.factory.Multimaps
 import java.util.*
 import java.util.function.Consumer
 
-internal open class DefaultEvent<T>(private val eventBus: EventBus,
+internal open class DefaultEvent<T>(private val eventBus: OldEventBus,
                                     override val name: String) : Event<T> {
 
   private val headers: Headers = Multimaps.mutable.set.empty()

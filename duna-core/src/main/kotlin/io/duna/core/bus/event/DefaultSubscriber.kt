@@ -1,6 +1,6 @@
 package io.duna.core.bus.event
 
-import io.duna.core.bus.EventBus
+import io.duna.core.bus.OldEventBus
 import io.duna.core.bus.Message
 import io.duna.core.concurrent.execution.ExecutionContext
 import io.reactivex.BackpressureStrategy
@@ -20,7 +20,7 @@ import kotlin.concurrent.write
 import io.reactivex.Emitter as RxEmitter
 
 internal open class DefaultSubscriber<T>(override val event: String,
-                                         private  val eventBus: EventBus,
+                                         private  val eventBus: OldEventBus,
                                          private  val executionContext: ExecutionContext,
                                          private  val maxCacheSize: Int = 10) : Subscriber<T> {
 

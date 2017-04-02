@@ -1,6 +1,6 @@
 package io.duna.core.bus.event
 
-import io.duna.core.bus.EventBus
+import io.duna.core.bus.OldEventBus
 import io.duna.core.bus.Message
 import org.eclipse.collections.api.multimap.Multimap
 import java.util.function.Consumer
@@ -13,7 +13,7 @@ import java.util.function.Consumer
  * @param T the type of attachment the event messages must carry.
  *
  * @author [Carlos Eduardo Melo][hk@cemelo.com]
- * @see [EventBus]
+ * @see [OldEventBus]
  */
 interface Event<T> {
 
@@ -40,7 +40,7 @@ interface Event<T> {
   /**
    * Emits this event and creates a [Subscriber] builder to receive the responses.
    *
-   * The request will only be dispatched by the [EventBus] after the [Subscriber]
+   * The request will only be dispatched by the [OldEventBus] after the [Subscriber]
    * is registered through [Subscriber.register].
    *
    * @param attachment  the attachment carried by this event.
@@ -52,7 +52,7 @@ interface Event<T> {
   /**
    * Emits this event and creates a [Subscriber] builder to receive the responses.
    *
-   * The request will only be dispatched by the [EventBus] after the [Subscriber]
+   * The request will only be dispatched by the [OldEventBus] after the [Subscriber]
    * is registered through [Subscriber.register].
    *
    * @param attachment  the attachment carried by this event.

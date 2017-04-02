@@ -1,6 +1,6 @@
 package io.duna.core.bus.event
 
-import io.duna.core.bus.EventBus
+import io.duna.core.bus.OldEventBus
 import io.duna.core.bus.Message
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
@@ -12,7 +12,7 @@ import java.util.function.Consumer
  * @param T the type of attachments the event messages carry.
  *
  * @author [Carlos Eduardo Melo][hk@cemelo.com]
- * @see [EventBus]
+ * @see [OldEventBus]
  */
 interface Subscriber<T> {
 
@@ -22,7 +22,7 @@ interface Subscriber<T> {
   val event: String
 
   /**
-   * Registers a sink to receive messages from the [EventBus].
+   * Registers a sink to receive messages from the [OldEventBus].
    *
    * @param messageSink the sink function.
    * @return this subscriber.
@@ -30,7 +30,7 @@ interface Subscriber<T> {
   fun onNext(messageSink: Consumer<in Message<T>>): Subscriber<T>
 
   /**
-   * Registers a sink to receive messages from the [EventBus].
+   * Registers a sink to receive messages from the [OldEventBus].
    *
    * @param messageSink the sink function.
    * @return this subscriber.
@@ -38,7 +38,7 @@ interface Subscriber<T> {
   fun onNext(messageSink: (Message<T>) -> Unit) = onNext(Consumer(messageSink::invoke))
 
   /**
-   * Registers a sink to receive error messages from the [EventBus].
+   * Registers a sink to receive error messages from the [OldEventBus].
    *
    * @param errorSink the sink function.
    * @return this subscriber.
@@ -46,7 +46,7 @@ interface Subscriber<T> {
   fun onError(errorSink: Consumer<in Message<T>>): Subscriber<T>
 
   /**
-   * Registers a sink to receive error messages from the [EventBus].
+   * Registers a sink to receive error messages from the [OldEventBus].
    *
    * @param errorSink the sink function.
    * @return this subscriber.
@@ -71,7 +71,7 @@ interface Subscriber<T> {
   fun toFlowable(backpressureStrategy: BackpressureStrategy): Flowable<T>
 
   /**
-   * Deregisters this subscriber from the [EventBus].
+   * Deregisters this subscriber from the [OldEventBus].
    *
    * @return whether the deregistration was successful.
    */
@@ -81,7 +81,7 @@ interface Subscriber<T> {
    * Marks this subscriber for execution in a worker pool.
    *
    * This option should be used when the consumer functions perform expensive computations.
-   * As the [EventBus] is executed in an event loop, this prevents any long operations from
+   * As the [OldEventBus] is executed in an event loop, this prevents any long operations from
    * blocking the main thread.
    *
    * @return this event subscriber

@@ -17,7 +17,7 @@ class DefaultEventLoopGroup(nThreads: Int,
 
   internal fun createExecutionContext(event: String): ExecutionContext {
 //    val eventLoop = next()
-//    val context = ExecutionContext(event, eventLoop, workerPool)
+//    val context = TaskContext(event, eventLoop, workerPool)
 //
 //    registeredContexts[event] = eventLoop
 //
